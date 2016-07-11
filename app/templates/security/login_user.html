@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "macros.html" import formfield %}
+
+{% block body_content %}
+
+<h1 class="heading-large">Login</h1>
+
+<form action="{{ url_for_security('login') }}" method="post" class="form">
+  {{ login_user_form.hidden_tag() }}
+  {{ formfield(login_user_form.email) }}
+  {{ formfield(login_user_form.password) }}
+  <button class="button">Login</button>
+</form>
+
+{% endblock %}

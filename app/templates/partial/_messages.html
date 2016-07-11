@@ -1,0 +1,11 @@
+{%- with messages = get_flashed_messages(with_categories=true) -%}
+  {% if messages %}
+    <div class="success-summary" role="group" aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+    <ul class="error-summary-list">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+{%- endwith %}

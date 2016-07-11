@@ -1,0 +1,42 @@
+{% extends "govuk_template/views/layouts/govuk_template.html" %}
+
+{% block head %}
+
+  {% assets "css_govuk_elements", "css_main" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+
+  <script src="/static/js/vendor/jquery/jquery.min.js"></script>
+
+  {% block endhead %}{% endblock %}
+
+{% endblock %}
+
+{% block body_classes %}full-width{% endblock %}
+
+{% block content %}
+  <div class="full-width-container">
+    {% block top_banner %}
+    <div class="grid-row">
+    </div>
+    {% endblock %}
+  </div>
+
+  <main id="wrapper" role="main">
+    <div id="content">
+
+      {% include "partial/_messages.html" %}
+
+      {% include "partial/login_state.html" %}
+
+      {% block body_content %}{% endblock %}
+
+      <div class="report-a-problem-toggle-wrapper js-footer feedback-footer">
+        <p class="report-a-problem-toggle">
+          <a href="" class="js-report-a-problem-toggle">Is there anything wrong with this page?</a>
+        </p>
+      </div>
+
+    </div>
+  </main>
+{% endblock %}

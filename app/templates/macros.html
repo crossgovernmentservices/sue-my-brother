@@ -1,0 +1,11 @@
+{% macro formfield(field) %}
+  <div class="form-group">
+    {{ field.label(class_="form-label") }}
+    {{ field(class_="form-control") }}
+    {% if field.errors %}
+      {% for error in field.errors %}
+      <span class="error">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endmacro %}
