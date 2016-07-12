@@ -25,3 +25,4 @@ pytest-spec
 pytest-splinter
 python-jose
 requests
+uWSGI==2.0.13.1
