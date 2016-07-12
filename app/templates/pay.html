@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "macros.html" import formfield %}
+
+{% block body_content %}
+
+  <h1 class="heading-large">Pay for filing the suit</h1>
+
+  <p>Please pay the &pound;1 fee for filing the lawsuit</p>
+
+  <form action="{{ url_for('base.confirm') }}" method="get" class="form">
+    <p><em>Not yet integrated</em></p>
+    <button class="button">Next</button>
+  </form>
+
+{% endblock %}

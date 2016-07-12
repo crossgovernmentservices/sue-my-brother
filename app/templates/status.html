@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+
+  <h1 class="heading-large">Status of your lawsuit</h1>
+
+  <p>
+    The lawsuit you filed against your brother, {{ suit.defendant.name }} on
+    {{ '{0:%d %B %Y at %H:%M}'.format(suit.created) }} is currently:
+  </p>
+
+  <p class="">
+    {%- if suit.accepted -%}
+      Accepted for review
+    {%- elif not suit.payment_id -%}
+      Awaiting payment confirmation
+    {%- else -%}
+      Awaiting review
+    {%- endif -%}
+  </p>
+
+{% endblock %}

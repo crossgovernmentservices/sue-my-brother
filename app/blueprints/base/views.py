@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, render_template, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_security import login_required
+from sqlalchemy import desc
 
 from .forms import DetailsForm, SuitForm
 from .models import Suit, User
@@ -45,4 +46,28 @@ def start_suit():
 @base.route('/pay', methods=['GET', 'POST'])
 @login_required
 def pay():
-    return 'Pay'
+    return render_template('pay.html')
+
+
+def current_suit(user):
+    return Suit.query.filter(
+        Suit.plaintiff == user).order_by(desc(Suit.created)).first()
+
+
+@base.route('/confirm', methods=['GET', 'POST'])
+@login_required
+def confirm():
+    suit = current_suit(current_user)
+
+    if request.method == 'POST':
+        return redirect(url_for('.status'))
+
+    return render_template('confirm.html', suit=suit)
+
+
+@base.route('/status')
+@login_required
+def status():
+    suit = current_suit(current_user)
+
+    return render_template('status.html', suit=suit)
