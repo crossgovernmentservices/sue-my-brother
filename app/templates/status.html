@@ -2,14 +2,23 @@
 
 {% block body_content %}
 
-  <h1 class="heading-large">Status of your lawsuit</h1>
+  {% set plural="" %}
 
+  <h1 class="heading-large">Status of your lawsuit{% if current_user.suits_brought|length > 1 %}s{% endif %}</h1>
+
+  <ul>
+  {% for suit in current_user.suits_brought %}
+
+  <li>
   <p>
-    The lawsuit you filed against your brother, {{ suit.defendant.name }} on
-    {{ '{0:%d %B %Y at %H:%M}'.format(suit.created) }} is currently:
+    The lawsuit you filed 
+    <strong class="bold-small">{{ suit.created|humanize() }}</strong>
+    against your brother,
+    <strong class="bold-small">{{ suit.defendant.name }}</strong>
+    is currently:
   </p>
 
-  <p class="">
+  <p class="panel">
     {%- if suit.accepted -%}
       Accepted for review
     {%- elif not suit.payment_id -%}
@@ -18,5 +27,11 @@
       Awaiting review
     {%- endif -%}
   </p>
+  </li>
+
+  {% endfor %}
+  </ul>
+
+  <a href="{{ url_for('base.start_suit') }}" class="button">Start new suit</a>
 
 {% endblock %}

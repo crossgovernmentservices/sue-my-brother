@@ -2,6 +2,7 @@
   {% if current_user.is_authenticated -%}
 
   <span class="user-name">{{ current_user.name|default(current_user.email) }}</span>
+  <a href="{{ url_for('base.details', action='edit') }}">Edit details</a> |
   <a href="{{ url_for_security('logout') }}">Sign out</a>
 
   {%- else -%}

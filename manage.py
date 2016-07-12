@@ -5,11 +5,11 @@ from flask_migrate import MigrateCommand
 from flask_script import Manager
 import pytest
 
-from app.factory import SueMyBrother
+from app.factory import create_app
 from lib.govuk_assets import ManageGovUkAssets
 
 
-manager = Manager(SueMyBrother)
+manager = Manager(create_app)
 manager.add_command('assets', ManageAssets())
 manager.add_command('db', MigrateCommand)
 manager.add_command('install_all_govuk_assets', ManageGovUkAssets())

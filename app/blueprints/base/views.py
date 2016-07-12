@@ -15,22 +15,49 @@ def index():
     return render_template('index.html')
 
 
-@base.route('/start', methods=['GET', 'POST'])
+@base.route('/details', methods=['GET', 'POST'])
+@base.route('/details/<action>', methods=['GET', 'POST'])
 @login_required
-def start():
+def details(action='set'):
+
+    if current_user.name and action == 'set':
+
+        suit = current_suit(current_user)
+        if suit:
+            return redirect(url_for('.status'))
+
+        return redirect(url_for('.start_suit'))
+
     form = DetailsForm()
+
+    if current_user.name:
+        form.name.data = current_user.name
+        form.email.data = current_user.email or ''
+        form.mobile.data = current_user.mobile or ''
 
     if form.validate_on_submit():
         current_user.update(**form.data)
 
         return redirect(url_for('.start_suit'))
 
-    return render_template('start.html', form=form)
+    return render_template('details.html', form=form)
+
+
+@base.route('/start')
+@login_required
+def start():
+
+    suit = current_suit(current_user)
+    if suit:
+        return redirect(url_for('.status'))
+
+    return redirect(url_for('.start_suit'))
 
 
 @base.route('/start-suit', methods=['GET', 'POST'])
 @login_required
 def start_suit():
+
     form = SuitForm()
 
     if form.validate_on_submit():
