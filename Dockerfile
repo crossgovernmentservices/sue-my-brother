@@ -14,5 +14,10 @@ ADD . /app
 
 RUN ./manage.py install_all_govuk_assets
 
+# local dev server port
 EXPOSE 5000
-CMD ./manage.py runserver -h 0.0.0.0
+
+# uWSGI port
+EXPOSE 3031
+
+CMD uwsgi --socket 0.0.0.0:3031 --manage-script-name --module=wsgi:app -pp=./app --processes 4 --threads 2
