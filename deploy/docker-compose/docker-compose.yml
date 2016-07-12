@@ -1,0 +1,35 @@
+version: '2'
+services:
+
+  postgres:
+    image: postgres:9.5.3
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: smb
+    volumes:
+      - /var/lib/postgresql/data
+
+  app:
+    build: ../../
+    environment:
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_NAME: smb
+      DB_HOST: postgres
+      DB_PORT: 5432
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    ports:
+      - "3031:3031"
+
+  nginx:
+    build: nginx/
+    links:
+      - app
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
