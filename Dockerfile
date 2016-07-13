@@ -21,4 +21,4 @@ EXPOSE 5000
 # uWSGI port
 EXPOSE 3031
 
-CMD uwsgi --socket 0.0.0.0:3031 --manage-script-name --module=wsgi:app -pp=./app --processes 4 --threads 2
+CMD uwsgi --socket 0.0.0.0:3031 --manage-script-name --module=app.wsgi:app -pp=./app --processes 4 --threads 2
