@@ -5,7 +5,7 @@ export GEM_HOME=/home/vcap/.gem/ruby/2.2.0
 export GEM_PATH=$GEM_HOME:$GEM_PATH
 export PATH=$GEM_HOME/bin:$PATH
 gem install --user-install bundle
-python manage.py install_all_govuk_assets
+python manage.py install_all_govuk_assets --clean
 
 echo "compiling SCSS files into CSS"
 python manage.py assets build
