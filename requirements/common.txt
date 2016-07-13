@@ -12,7 +12,7 @@ docopt==0.6.2
 docutils==0.12
 ecdsa==0.13
 Flask==0.11.1
-Flask-Assets==0.11
+git+https://github.com/miracle2k/flask-assets.git@master#egg=flask-assets
 Flask-Humanize==0.3.0
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
@@ -33,7 +33,7 @@ libsass==0.11.1
 Mako==1.0.4
 MarkupSafe==0.23
 monotonic==0.3
-notifications-python-client==1.0.0
+git+https://github.com/alphagov/notifications-python-client.git@1.0.0#egg=notifications-python-client
 passlib==1.6.5
 psycopg2==2.6.2
 pyasn1==0.1.9
