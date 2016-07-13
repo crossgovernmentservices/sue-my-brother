@@ -1,0 +1,4 @@
+---
+applications:
+- name: sue-my-brother
+  memory: 512M

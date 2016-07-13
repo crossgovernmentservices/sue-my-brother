@@ -41,6 +41,10 @@ if all(DB.values()):
     SQLALCHEMY_DATABASE_URI = (
         'postgresql://{user}:{pass}@{host}:{port}/{name}'.format(**DB))
 
+# Cloud Foundry provides DATABASE_URL
+if 'DATABASE_URL' in env:
+    SQLALCHEMY_DATABASE_URI = env.get('DATABASE_URL')
+
 
 # XXX Don't change the following settings unless necessary
 
