@@ -93,3 +93,5 @@ app/templates/govuk_template/
 app/static/stylesheets/
 app/static/javascript/
 env.sh
+
+*.db

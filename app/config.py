@@ -36,7 +36,9 @@ OIDC_PROVIDERS = {
 SECRET_KEY = env.get('SECRET_KEY', b'\x07\x7f\x02p\xf4\xa0\xe8\xc0lA\x9e\xdbK\xdb\x1b\xd3\x81=\x1d\xec\\\xd7\xbe\x06')
 
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/{}'.format(DB['name'])
+SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(
+    os.path.join(os.path.dirname(__file__), '../{}.db'.format(DB['name'])))
+
 if all(DB.values()):
     SQLALCHEMY_DATABASE_URI = (
         'postgresql://{user}:{pass}@{host}:{port}/{name}'.format(**DB))

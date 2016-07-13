@@ -86,9 +86,18 @@ def register_extensions(app):
     db.app = app
 
     from flask_migrate import Migrate
+    from sqlalchemy.exc import ArgumentError
     migrate = Migrate()
+    # XXX SQLite chokes on constraint changes without this
     with app.app_context():
-        migrate.init_app(app, db)
+        try:
+            render_as_batch = db.engine.url.drivername == 'sqlite'
+
+        # XXX this happens during a test
+        except ArgumentError:
+            render_as_batch = True
+
+        migrate.init_app(app, db, render_as_batch=bool(render_as_batch))
 
     from flask_humanize import Humanize
     Humanize(app)
