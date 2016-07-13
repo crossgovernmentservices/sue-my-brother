@@ -3,6 +3,7 @@
 from flask_assets import ManageAssets
 from flask_migrate import MigrateCommand
 from flask_script import Manager
+from flask_security.utils import encrypt_password
 import pytest
 
 from app.extensions import user_datastore
@@ -46,10 +47,12 @@ def add_users():
     with open('users.txt') as f:
         users = (line.split(',') for line in f.readlines())
         for email, password in users:
-            if not user_datastore.find_user(email=email.strip()):
-                user_datastore.create_user(
-                    email=email.strip(),
-                    password=password.strip())
+            user = user_datastore.find_user(email=email.strip())
+            if not user:
+                user = user_datastore.user_model(email=email.strip())
+            user.active = True
+            user.password = encrypt_password(password.strip())
+            user_datastore.put(user)
     user_datastore.commit()
 
 
