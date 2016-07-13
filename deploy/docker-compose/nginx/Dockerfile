@@ -1,2 +1,2 @@
-FROM nginx:1.11.1-alpine
-COPY nginx.conf /etc/nginx/nginx.conf
+FROM nginx:1.11.1
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
