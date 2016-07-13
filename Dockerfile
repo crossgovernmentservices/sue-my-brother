@@ -4,8 +4,9 @@ FROM python:3.5.2
 
 WORKDIR /app
 
-ADD requirements.txt /app/requirements.txt
-RUN pip install -r requirements.txt
+ADD requirements/common.txt /app/requirements/common.txt
+ADD requirements/docker.txt /app/requirements/docker.txt
+RUN pip install -r requirements/docker.txt
 
 RUN apt-get update && apt-get install -y ruby ruby-dev
 RUN gem install bundler
