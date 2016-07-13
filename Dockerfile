@@ -5,7 +5,6 @@ FROM python:3.5.2
 WORKDIR /app
 
 ADD requirements/common.txt /app/requirements/common.txt
-ADD requirements/test.txt /app/requirements/test.txt
 ADD requirements/docker.txt /app/requirements/docker.txt
 RUN pip install -r requirements/docker.txt
 
