@@ -1,1 +1,1 @@
-web: python manage.py db upgrade && waitress-serve --port=$PORT app.wsgi:app
+web: python manage.py db upgrade && python manage.py add_users && waitress-serve --port=$PORT app.wsgi:app

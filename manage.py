@@ -5,6 +5,7 @@ from flask_migrate import MigrateCommand
 from flask_script import Manager
 import pytest
 
+from app.extensions import user_datastore
 from app.factory import create_app
 from lib.govuk_assets import ManageGovUkAssets
 
@@ -38,6 +39,18 @@ def test(spec, suite):
     args.extend(suites[suite])
 
     return pytest.main(args)
+
+
+@manager.command
+def add_users():
+    with open('users.txt') as f:
+        users = (line.split(',') for line in f.readlines())
+        for email, password in users:
+            if not user_datastore.find_user(email=email.strip()):
+                user_datastore.create_user(
+                    email=email.strip(),
+                    password=password.strip())
+    user_datastore.commit()
 
 
 if __name__ == '__main__':
