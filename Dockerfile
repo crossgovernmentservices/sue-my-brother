@@ -14,6 +14,8 @@ RUN gem install bundler
 ADD . /app
 
 RUN ./manage.py install_all_govuk_assets
+RUN ./manage.py db upgrade
+RUN ./manage.py add_users
 
 # local dev server port
 EXPOSE 5000
