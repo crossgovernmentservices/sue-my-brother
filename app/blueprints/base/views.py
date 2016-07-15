@@ -1,10 +1,12 @@
-from flask import Blueprint, redirect, render_template, request, url_for
-from flask_login import current_user
-from flask_security import login_required
+import datetime
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_security import current_user, login_required, roles_required
 from sqlalchemy import desc
 
 from .forms import DetailsForm, SuitForm
 from .models import Suit, User
+from app.extensions import db, notify
 
 
 base = Blueprint('base', __name__)
@@ -12,6 +14,11 @@ base = Blueprint('base', __name__)
 
 @base.route('/')
 def index():
+
+    suit = current_suit(current_user)
+    if suit:
+        return redirect(url_for('.status'))
+
     return render_template('index.html')
 
 
@@ -62,10 +69,14 @@ def start_suit():
 
     if form.validate_on_submit():
         brother, _ = User.get_or_create(name=form.brothers_name.data)
+
+        if form.brothers_mobile.data:
+            brother.update(mobile=form.brothers_mobile.data)
+
         suit = Suit(plaintiff=current_user, defendant=brother)
         suit.save()
 
-        return redirect(url_for('.pay'))
+        return redirect(url_for('.confirm'))
 
     return render_template('suit.html', form=form)
 
@@ -73,6 +84,11 @@ def start_suit():
 @base.route('/pay', methods=['GET', 'POST'])
 @login_required
 def pay():
+
+    if request.method == 'POST':
+        flash('Payment successful, lawsuit filed')
+        return redirect(url_for('.status'))
+
     return render_template('pay.html')
 
 
@@ -87,7 +103,13 @@ def confirm():
     suit = current_suit(current_user)
 
     if request.method == 'POST':
-        return redirect(url_for('.status'))
+        suit.update(confirmed=datetime.datetime.utcnow())
+
+        notify['sms'].send_sms(
+            suit.defendant.mobile,
+            plaintiff=suit.plaintiff.name)
+
+        return redirect(url_for('.pay'))
 
     return render_template('confirm.html', suit=suit)
 
@@ -95,6 +117,39 @@ def confirm():
 @base.route('/status')
 @login_required
 def status():
-    suit = current_suit(current_user)
+    suits = Suit.query.filter(Suit.confirmed.isnot(None)).all()
+    return render_template('status.html', suits=suits)
 
-    return render_template('status.html', suit=suit)
+
+@base.route('/admin')
+@roles_required('admin')
+def admin():
+    suits = Suit.query.all()
+    return render_template('admin/index.html', suits=suits)
+
+
+@base.route('/admin/<suit>/accept', methods=['GET', 'POST'])
+@roles_required('admin')
+def accept(suit):
+    suit = Suit.query.get(suit)
+    suit.accepted = datetime.datetime.utcnow()
+    db.session.add(suit)
+    db.session.commit()
+
+    notify['accept'].send_email(
+        suit.plaintiff.email,
+        plaintiff=suit.plaintiff.name,
+        defendant=suit.defendant.name)
+
+    flash('Suit accepted')
+    return redirect(url_for('.admin'))
+
+
+@base.route('/admin/<suit>/reject', methods=['POST'])
+@roles_required('admin')
+def reject(suit):
+    suit = Suit.query.get(suit)
+    db.session.delete(suit)
+    db.session.commit()
+    flash('Suit rejected')
+    return redirect(url_for('.admin'))

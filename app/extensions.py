@@ -9,6 +9,8 @@ from sqlalchemy import MetaData, event
 from sqlalchemy.engine import Engine
 from sqlite3 import Connection as SQLite3Connection
 
+from lib.notify import Notify
+
 
 @event.listens_for(Engine, 'connect')
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -26,5 +28,7 @@ naming_convention = {
     'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
     'pk': 'pk_%(table_name)s'}
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
+
+notify = Notify()
 
 user_datastore = SQLAlchemyUserDatastore(db, None, None)

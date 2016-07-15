@@ -16,3 +16,4 @@ class DetailsForm(Form):
 
 class SuitForm(Form):
     brothers_name = StringField('Your Brother\'s Full Name', validators=[DataRequired()])
+    brothers_mobile = StringField('Your Brother\'s Mobile Phone Number')

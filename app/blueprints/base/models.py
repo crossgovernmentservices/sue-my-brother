@@ -37,7 +37,7 @@ class User(db.Model, UserMixin, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
         backref=db.backref('users', lazy='dynamic'))
 
 
-class Suit(db.Model, GetOrCreateMixin, GetOr404Mixin):
+class Suit(db.Model, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
     id = db.Column(db.Integer, primary_key=True)
     plaintiff_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     plaintiff = db.relationship(
@@ -46,6 +46,7 @@ class Suit(db.Model, GetOrCreateMixin, GetOr404Mixin):
     defendant = db.relationship(
         'User', backref='suits_against', foreign_keys=[defendant_id])
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    confirmed = db.Column(db.DateTime, nullable=True)
     accepted = db.Column(db.DateTime, nullable=True)
     payment_id = db.Column(db.String, nullable=True)
 

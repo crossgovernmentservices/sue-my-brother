@@ -4,10 +4,10 @@
 
   {% set plural="" %}
 
-  <h1 class="heading-large">Status of your lawsuit{% if current_user.suits_brought|length > 1 %}s{% endif %}</h1>
+  <h1 class="heading-large">Status of your lawsuit{% if suits|length > 1 %}s{% endif %}</h1>
 
   <ul>
-  {% for suit in current_user.suits_brought %}
+  {% for suit in suits %}
 
   <li>
   <p>

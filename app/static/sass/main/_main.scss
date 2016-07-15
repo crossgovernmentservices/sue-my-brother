@@ -20,295 +20,34 @@
   margin-right: 10px;
 }
 
-.objective {
-  border: 1px $grey-2 solid !important;
-  margin: 10px 0px;
+.secondary.button {
+  background: $grey-3;
+  color: $black;
+  box-shadow: 0 2px 0 $grey-2;
 }
 
-.objective-header {
-  @extend %contain-floats;
-  padding: 10px;
+.column-full {
+  padding: 0 15px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-.toggle {
-  float: right;
-}
-
-.details {
-  border-top: 1px $grey-2 solid;
-  padding: 10px;
-}
-
-.edit-controls {
-  float: right;
-  margin-top: -25px;
-}
-
-.recipients ul {
-  margin: 20px 0px;
-}
-
-.recipients li {
-  background: $grey-4;
-  border: 1px solid $grey-2;
-  padding: 15px;
-  margin-bottom: 5px;
-}
-
-.recipients li:hover {
-  border: 1px solid #000;
-}
-
-.recipients li a {
-  float: right;
-}
-
-.search-button {
-  padding-top: 5px;
-  margin-left: -4px;
-  width: 45px;
-  height: 38px;
-  border: none;
-  overflow: hidden;
-  text-indent: -5000px;
-  background: #000 no-repeat center url(/static/icons/icon-search.png);
-  cursor: pointer;
-}
-
-.request-status {
-  float: right;
-}
-
-.feedback-template {
-   border: 1px solid $grey-2;
-   padding: 10px;
-}
-
-.feedback-template h1, h2, h3, h4, h5, h6 {
-  font-weight: bold;
-}
-
-.feedback-template ul {
-  margin-top: 5px;
-  list-style: initial;
-  margin-left: 20px;
-}
-
-.feedback-template p {
-  line-height: 1.2em;
-  margin: 10px 0px;
-}
-
-.feedback-template {
-  word-break: word;
-}
-
-.feedback-footer {
-  @extend %site-width-container;
-  padding: $gutter-half 0;
-  font-size: 16px;
-
-  a,
-  a:hover,
-  a:visited {
-    color: $secondary-text-colour;
-  }
-}
-
-.add-feedback .form-control {
+.suits {
   width: 100%;
-}
+  margin: 0 0 1em;
 
-.log-table {
-  table-layout: fixed;
-}
-
-.edit-log-entry {
-
-}
-
-.edit-log-entry textarea {
-  width: 100%;
-}
-
-.edit-log-entry  .form-label {
-  font-weight: bold;
-}
-
-/* quick hack for override elements
-* styles for markdown text area
-*/
-.details h1, h2, h3, h4, h5, h6 {
-  font-weight: bold;
-}
-
-.details ul {
-  margin-top: 5px;
-  list-style: initial;
-  margin-left: 20px;
-}
-
-/* end quick hack */
-
-/*
-* used on the add objective page
-*/
-.add-objective .form-control {
-  width: 100%;
-}
-
-.guidance-heading {
-  margin-top: 1em;
-}
-
-.success-summary {
-  @extend .error-summary;
-  border-color: $button-colour;
-}
-
-.section {
-  margin-top: 1.5em;
-  margin-bottom: 1em;
-}
-
-.section .form-control {
-  width: 100%;
-}
-
-.feedback-message {
-  font-family: monospace;
-  font-size: 16px;
-}
-
-.filter {
-  display: inline-block;
-  position: relative;
-  background: $focus-colour;
-  padding: 0 35px 0 10px;
-  border-radius: 4px;
-  line-height: 45px;
-  margin: $gutter 0 0;
-}
-
-.filter-off-btn {
-  position: absolute;
-  background: lighten($focus-colour, 10%);
-  right: 0; top: 0;
-  height: 100%;
-  padding: 0 10px;
-  line-height: 45px;
-  text-decoration: none;
-  border-radius: 0 4px 4px 0;
-
-  &:focus {
-    background: lighten($focus-colour, 20%);
-    outline: none;
-  }
-}
-
-//
-// This is used for the sliders on the 
-// skills audit form page
-//
-.skills-audit-form {
-  margin-top: $gutter;
-}
-
-@mixin rangeThumb {
-  width: 18px;
-  height: 18px;
-  margin: -8px 0  0;
-  border-radius: 50%;
-  background: $link-hover-colour;
-  cursor: pointer;
-  border: 0 !important;
-}
-
-@mixin rangeTrack {
-  width: 100%;
-  height: 2px;
-  cursor: pointer;
-  background: $secondary-text-colour;
-}
-
-.form-range-group {
-  position: relative;
-  margin-bottom: 60px;
-
-  .form-label {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 15px;
+  form {
+    display: inline-block;
+    margin: 0 5px;
   }
 
-  .form-control {
-    width: 100%;
-    outline: none;
-    border: none;
-    -webkit-appearance: none;
-
-    // Thumb
-      &::-webkit-slider-thumb {
-        -webkit-appearance: none; // needed again for Chrome & Safari
-        @include rangeThumb;
-      }
-      &::-moz-range-thumb {
-          @include rangeThumb;
-        }
-
-      &::-ms-thumb {
-        @include rangeThumb;
-      }
-
-      // Track
-      &::-webkit-slider-runnable-track {
-        @include rangeTrack;
-      }
-
-      &::-moz-range-track {
-        @include rangeTrack;
-      }
-
-      &::-ms-track {
-        @include rangeTrack;
-      }
-  }
-}
-
-.capability-labels {
-  @extend %contain-floats;
-  list-style: none;
-  margin-bottom: $gutter;
-
-  li {
-    width: 23%;
-    float: left;
-    text-align: center;
-    box-sizing: border-box;
-    border-right: 2px solid $secondary-text-colour;
-
-    &.na {
-      width: 8%;
-    }
-
-    &:last-child {
-      border-right: none;
-    }
-
-    &.selected {
-      font-weight: bold;
-    }
-  }
-}
-
-.capability-level-explanations {
-  margin-left: 7%;
-
-  th {
-    width: 25%;
+  .accepted {
+    display: inline-block;
+    line-height: 1.25;
+    position: relative;
+    top: 7px;
+    margin: 0 5px;
   }
 
-  td {
-    vertical-align: top;
-  }
 }

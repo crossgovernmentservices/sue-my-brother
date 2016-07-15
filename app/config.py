@@ -24,6 +24,16 @@ DB = {
 
 DEBUG = bool(env.get('DEBUG', True))
 
+GOVUK_NOTIFY = {
+    'base_url': env.get('GOVUK_NOTIFY_BASE_URL'),
+    'client_id': env.get('GOVUK_NOTIFY_SERVICE_ID'),
+    'secret': env.get('GOVUK_NOTIFY_API_KEY'),
+    'templates': {
+        'accept': env.get('GOVUK_NOTIFY_TEMPLATE_ID_ACCEPT'),
+        'sms': env.get('GOVUK_NOTIFY_TEMPLATE_ID_SMS')
+    }
+}
+
 OIDC_PROVIDERS = {
     'dex': {
         'discovery_url': env.get('DEX_APP_DISCOVERY_URL'),

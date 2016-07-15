@@ -108,3 +108,6 @@ def register_extensions(app):
     user_datastore.role_model = Role
     user_datastore.user_model = User
     Security(app, user_datastore)
+
+    from app.extensions import notify
+    notify.init_app(app)

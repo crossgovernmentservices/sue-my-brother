@@ -3,3 +3,4 @@ kerin.cosford@digital.cabinet-office.gov.uk,password
 tom.dolan@digital.cabinet-office.gov.uk,password
 colm.britton@digital.cabinet-office.gov.uk,password
 abisola.fatokun@digital.cabinet-office.gov.uk,password
+simon.everest@digital.cabinet-office.gov.uk,password

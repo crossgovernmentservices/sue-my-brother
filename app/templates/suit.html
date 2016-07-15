@@ -5,11 +5,12 @@
 
   <h1 class="heading-large">Details of suit</h1>
 
-  <p>Please enter the name of your brother</p>
+  <p>Please enter the name of your brother and, optionally, his mobile number</p>
 
   <form action="" method="post" class="form">
     {{ form.csrf_token }}
     {{ formfield(form.brothers_name) }}
+    {{ formfield(form.brothers_mobile) }}
     <button class="button">Next</button>
   </form>
 
