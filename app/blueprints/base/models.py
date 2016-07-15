@@ -27,7 +27,7 @@ class User(db.Model, UserMixin, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=True, unique=True)
     password = db.Column(db.String(255))
-    mobile = db.Column(db.String(30), nullable=True, unique=True)
+    mobile = db.Column(db.String(30), nullable=True)
     name = db.Column(db.String)
     active = db.Column(db.Boolean)
     confirmed_at = db.Column(db.DateTime)

@@ -18,7 +18,12 @@ class Notification(object):
         if personalisation:
             self.data['personalisation'] = personalisation
 
-        return self.client.post(endpoint, data=self.data)
+        try:
+            return self.client.post(endpoint, data=self.data)
+
+        except Exception as e:
+            print("POST {}{} failed".format(self.client.base_url, endpoint))
+            raise e
 
     def send_sms(self, recipient, **personalisation):
         return self._send('/notifications/sms', recipient, personalisation)

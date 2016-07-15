@@ -6,7 +6,7 @@ from sqlalchemy import desc
 
 from .forms import DetailsForm, SuitForm
 from .models import Suit, User
-from app.extensions import db, notify
+from app.extensions import db, notify, user_datastore
 
 
 base = Blueprint('base', __name__)
@@ -93,8 +93,9 @@ def pay():
 
 
 def current_suit(user):
-    return Suit.query.filter(
-        Suit.plaintiff == user).order_by(desc(Suit.created)).first()
+    if user.is_authenticated:
+        return Suit.query.filter(
+            Suit.plaintiff == user).order_by(desc(Suit.created)).first()
 
 
 @base.route('/confirm', methods=['GET', 'POST'])
@@ -128,7 +129,7 @@ def admin():
     return render_template('admin/index.html', suits=suits)
 
 
-@base.route('/admin/<suit>/accept', methods=['GET', 'POST'])
+@base.route('/admin/suits/<suit>/accept', methods=['GET', 'POST'])
 @roles_required('admin')
 def accept(suit):
     suit = Suit.query.get(suit)
@@ -145,7 +146,7 @@ def accept(suit):
     return redirect(url_for('.admin'))
 
 
-@base.route('/admin/<suit>/reject', methods=['POST'])
+@base.route('/admin/suits/<suit>/reject', methods=['POST'])
 @roles_required('admin')
 def reject(suit):
     suit = Suit.query.get(suit)
@@ -153,3 +154,40 @@ def reject(suit):
     db.session.commit()
     flash('Suit rejected')
     return redirect(url_for('.admin'))
+
+
+@base.route('/admin/users')
+@roles_required('admin')
+def admin_users():
+    users = User.query.all()
+    return render_template('admin/users.html', users=users)
+
+
+@base.route('/admin/users/<user>', methods=['POST'])
+@roles_required('admin')
+def update_user(user):
+    user = user_datastore.get_user(user)
+
+    user.update(
+        name=request.form['name'].strip(),
+        email=request.form['email'].strip(),
+        mobile=request.form['mobile'].strip(),
+        active=bool(request.form['active'].strip())
+    )
+
+    admin_role = user_datastore.find_role('admin')
+
+    make_admin = bool(request.form['admin'])
+    if not user.has_role('admin'):
+
+        if make_admin:
+            user_datastore.add_role_to_user(user, admin_role)
+            flash('Made {} an admin'.format(user.name))
+
+    elif not make_admin:
+        user_datastore.remove_role_from_user(user, admin_role)
+        flash('Made {} not an admin'.format(user.name))
+
+    db.commit()
+
+    return redirect(url_for('.admin_users'))

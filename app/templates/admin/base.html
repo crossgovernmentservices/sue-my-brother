@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('base.admin') }}">Suits</a></li>
+      <li><a href="{{ url_for('base.admin_users') }}">Users</a></li>
+    </ul>
+  </nav>
+
+  {% block admin_content %}{% endblock %}
+
+{% endblock %}

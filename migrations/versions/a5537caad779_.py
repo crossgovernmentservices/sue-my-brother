@@ -32,8 +32,7 @@ def upgrade():
     sa.Column('active', sa.Boolean(), nullable=True),
     sa.Column('confirmed_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('mobile')
+    sa.UniqueConstraint('email')
     )
     op.create_table('suit',
     sa.Column('id', sa.Integer(), nullable=False),
