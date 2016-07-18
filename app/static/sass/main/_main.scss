@@ -20,6 +20,12 @@
   margin-right: 10px;
 }
 
+nav.admin {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
 .secondary.button {
   background: $grey-3;
   color: $black;
@@ -50,4 +56,9 @@
     margin: 0 5px;
   }
 
+}
+
+.success-summary {
+  @extend .error-summary;
+  border-color: $button-colour;
 }
