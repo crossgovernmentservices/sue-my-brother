@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 from flask_assets import ManageAssets
 from flask_migrate import MigrateCommand
 from flask_script import Manager
@@ -57,6 +59,27 @@ def add_users():
             user.password = encrypt_password(password.strip())
             user_datastore.put(user)
     user_datastore.commit()
+
+
+def set_env_vars(cmd='export', delim='=', quote=True):
+    with open('notify.env') as f:
+        for line in f.readlines():
+            key, val = line.split('=')
+            key = key.strip()
+            val = val.strip()
+            if quote:
+                val = '"{}"'.format(val)
+            print('{} {}{}{}'.format(cmd, key, delim, val))
+
+
+@manager.command
+def set_env():
+    set_env_vars()
+
+
+@manager.command
+def set_cf_env():
+    set_env_vars(cmd='cf set-env sue-my-brother', delim=' ', quote=False)
 
 
 if __name__ == '__main__':
