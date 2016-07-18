@@ -188,6 +188,6 @@ def update_user(user):
         user_datastore.remove_role_from_user(user, admin_role)
         flash('Made {} not an admin'.format(user.name))
 
-    db.commit()
+    db.session.commit()
 
     return redirect(url_for('.admin_users'))
