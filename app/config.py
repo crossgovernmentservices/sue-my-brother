@@ -25,6 +25,7 @@ DB = {
 DEBUG = bool(env.get('DEBUG', True))
 
 GOVUK_NOTIFY = {
+    'disabled': True,
     'base_url': env.get('GOVUK_NOTIFY_BASE_URL'),
     'client_id': env.get('GOVUK_NOTIFY_SERVICE_ID'),
     'secret': env.get('GOVUK_NOTIFY_API_KEY'),
@@ -34,14 +35,22 @@ GOVUK_NOTIFY = {
     }
 }
 
-OIDC_PROVIDERS = {
-    'dex': {
-        'discovery_url': env.get('DEX_APP_DISCOVERY_URL'),
-        'client_id': env.get('DEX_APP_CLIENT_ID'),
-        'client_secret': env.get('DEX_APP_CLIENT_SECRET'),
-        'redirect_uri': env.get('DEX_APP_REDIRECT_URI')
-    }
+GOVUK_PAY = {
+    'base_url': env.get('GOVUK_PAY_BASE_URL'),
+    'api_key': env.get('GOVUK_PAY_API_KEY')
 }
+
+OIDC = {
+    'type': 'web',
+    'issuer': env.get('OIDC_ISSUER'),
+    'client_id': env.get('OIDC_CLIENT_ID'),
+    'client_secret': env.get('OIDC_CLIENT_SECRET'),
+}
+
+# XXX This should be True when served over HTTPS
+OIDC_COOKIE_SECURE = False
+
+OIDC_GOOGLE_APPS_DOMAIN = env.get('OIDC_GOOGLE_APPS_DOMAIN')
 
 SECRET_KEY = env.get('SECRET_KEY', b'\x07\x7f\x02p\xf4\xa0\xe8\xc0lA\x9e\xdbK\xdb\x1b\xd3\x81=\x1d\xec\\\xd7\xbe\x06')
 

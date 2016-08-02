@@ -5,7 +5,7 @@ Sue My Brother app factory class
 
 import os
 
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request
 
 
 def create_app(config='config.py', **kwargs):
@@ -111,3 +111,9 @@ def register_extensions(app):
 
     from app.extensions import notify
     notify.init_app(app)
+
+    from app.extensions import oidc
+    oidc.init_app(app)
+
+    from app.extensions import pay
+    pay.init_app(app)

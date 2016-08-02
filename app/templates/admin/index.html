@@ -13,7 +13,7 @@
             <th>Created</th>
             <th>Plaintiff</th>
             <th>Defendant</th>
-            <th>Paid</th>
+            <th>Payment</th>
             <th></th>
           </tr>
         </thead>
@@ -25,7 +25,7 @@
             <td>{{ suit.defendant.name }}</td>
             <td>
               {%- if suit.payment_id -%}
-                <a href="#{{ suit.payment_id }}">Paid</a>
+                {{ suit.payment.status }}
               {%- else -%}
                 Not paid
               {%- endif -%}

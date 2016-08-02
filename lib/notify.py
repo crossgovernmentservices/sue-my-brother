@@ -13,6 +13,10 @@ class Notification(object):
         self.data = {'template': template_id}
 
     def _send(self, endpoint, recipient, personalisation):
+
+        if self.client.disabled:
+            return
+
         self.data['to'] = recipient
 
         if personalisation:
@@ -38,6 +42,7 @@ class Notify(NotificationsAPIClient):
         self.base_url = None
         self.client_id = None
         self.secret = None
+        self.disabled = False
         self.notifications = {}
 
         if app:
@@ -49,6 +54,7 @@ class Notify(NotificationsAPIClient):
         self.base_url = config.get('base_url')
         self.client_id = config.get('client_id')
         self.secret = config.get('secret')
+        self.disabled = config.get('disabled', False)
 
         assert self.base_url, "Missing GOVUK_NOTIFY base_url setting"
         assert self.client_id, "Missing GOVUK_NOTIFY client_id setting"

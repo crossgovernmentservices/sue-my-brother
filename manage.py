@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os
-
 from flask_assets import ManageAssets
 from flask_migrate import MigrateCommand
 from flask_script import Manager
@@ -80,6 +78,14 @@ def set_env():
 @manager.command
 def set_cf_env():
     set_env_vars(cmd='cf set-env sue-my-brother', delim=' ', quote=False)
+
+
+@manager.command
+def runserver_ssl():
+    manager.app.run(
+        host='localhost',
+        port=5443,
+        ssl_context=('server.crt', 'server.key'))
 
 
 if __name__ == '__main__':
