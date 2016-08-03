@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 from flask_assets import ManageAssets
 from flask_migrate import MigrateCommand
 from flask_script import Manager
@@ -59,8 +61,8 @@ def add_users():
     user_datastore.commit()
 
 
-def set_env_vars(cmd='export', delim='=', quote=True):
-    with open('notify.env') as f:
+def set_env_vars(env_file, cmd='export', delim='=', quote=True):
+    with open(env_file) as f:
         for line in f.readlines():
             key, val = line.split('=')
             key = key.strip()
@@ -72,7 +74,9 @@ def set_env_vars(cmd='export', delim='=', quote=True):
 
 @manager.command
 def set_env():
-    set_env_vars()
+    for env_file in os.scandir():
+        if env_file.name.endswith('.env'):
+            set_env_vars(env_file.name)
 
 
 @manager.command
