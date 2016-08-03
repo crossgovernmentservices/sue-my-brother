@@ -81,7 +81,13 @@ def set_env():
 
 @manager.command
 def set_cf_env():
-    set_env_vars(cmd='cf set-env sue-my-brother', delim=' ', quote=False)
+    for env_file in os.scandir():
+        if env_file.name.endswith('.env'):
+            set_env_vars(
+                env_file.name,
+                cmd='cf set-env sue-my-brother',
+                delim=' ',
+                quote=False)
 
 
 @manager.command

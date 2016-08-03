@@ -168,6 +168,10 @@ class OIDCClient(OpenIDConnect):
             issuer_id=id_token['iss'],
             subject_id=id_token['sub'])
 
+    def find_user(self, user_info):
+        return self.app.extensions['security'].datastore.find_user(
+            email=user_info['email'])
+
     def create_user(self, id_token, user_info):
         user_datastore = self.app.extensions['security'].datastore
         user = user_datastore.create_user(
@@ -182,6 +186,9 @@ class OIDCClient(OpenIDConnect):
         print(user_info)
 
         user = self.get_user(id_token)
+
+        if not user:
+            user = self.find_user(user_info)
 
         if not user:
             user = self.create_user(id_token, user_info)
