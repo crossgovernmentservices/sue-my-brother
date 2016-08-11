@@ -64,7 +64,11 @@ def add_users():
 def set_env_vars(env_file, cmd='export', delim='=', quote=True):
     with open(env_file) as f:
         for line in f.readlines():
-            key, val = line.split('=')
+            key, val = line.split('=', 1)
+
+            if not key or not val or key.startswith('#'):
+                continue
+
             key = key.strip()
             val = val.strip()
             if quote:
