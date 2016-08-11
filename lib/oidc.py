@@ -158,8 +158,9 @@ class OIDCClient(OpenIDConnect):
             self._config[issuer].update(requests.get(
                 '{}/.well-known/openid-configuration'.format(issuer)).json())
 
-            self.client_secrets['userinfo_uri'] = (
-                self._config[issuer]['userinfo_endpoint'])
+            if 'userinfo_endpoint' in self._config[issuer]:
+                self.client_secrets['userinfo_uri'] = (
+                    self._config[issuer]['userinfo_endpoint'])
 
         return config
 
