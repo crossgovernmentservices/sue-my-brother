@@ -51,10 +51,14 @@ class Notify(NotificationsAPIClient):
     def init_app(self, app):
         self._app = app
         config = dict(app.config['GOVUK_NOTIFY'])
+
         self.base_url = config.get('base_url')
         self.client_id = config.get('client_id')
         self.secret = config.get('secret')
         self.disabled = config.get('disabled', False)
+
+        if self.disabled:
+            return
 
         assert self.base_url, "Missing GOVUK_NOTIFY base_url setting"
         assert self.client_id, "Missing GOVUK_NOTIFY client_id setting"

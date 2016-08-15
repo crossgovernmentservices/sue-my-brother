@@ -25,7 +25,7 @@ DB = {
 DEBUG = bool(env.get('DEBUG', True))
 
 GOVUK_NOTIFY = {
-    'disabled': True,
+    'disabled': 'GOVUK_NOTIFY_BASE_URL' not in env,
     'base_url': env.get('GOVUK_NOTIFY_BASE_URL'),
     'client_id': env.get('GOVUK_NOTIFY_SERVICE_ID'),
     'secret': env.get('GOVUK_NOTIFY_API_KEY'),
@@ -36,11 +36,13 @@ GOVUK_NOTIFY = {
 }
 
 GOVUK_PAY = {
+    'disabled': 'GOVUK_PAY_BASE_URL' not in env,
     'base_url': env.get('GOVUK_PAY_BASE_URL'),
     'api_key': env.get('GOVUK_PAY_API_KEY')
 }
 
 OIDC = {
+    'disabled': 'OIDC_ISSUER' not in env,
     'type': 'web',
     'issuer': env.get('OIDC_ISSUER'),
     'client_id': env.get('OIDC_CLIENT_ID'),

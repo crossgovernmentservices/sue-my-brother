@@ -97,9 +97,14 @@ class OIDCClient(OpenIDConnect):
 
         self.add_callback_route(app)
 
+        config = app.config['OIDC']
+        self.disabled = config.get('disabled', False)
+
+        if self.disabled:
+            return
+
         self.add_request_decorators(app)
 
-        config = app.config['OIDC']
         config.update(self.openid_config(config.get('issuer', {})))
         self.flow = oauth_flow(config, app.config['OIDC_SCOPES'])
         assert isinstance(self.flow, OAuth2WebServerFlow)
@@ -261,8 +266,10 @@ class OIDCClient(OpenIDConnect):
 
             if not current_user.is_authenticated:
 
-                if getattr(g, 'oidc_id_token', None) is None:
-                    return self.redirect_to_auth_server(request.url)
+                if not self.disabled:
+
+                    if getattr(g, 'oidc_id_token', None) is None:
+                        return self.redirect_to_auth_server(request.url)
 
                 return current_app.login_manager.unauthorized()
 

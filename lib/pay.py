@@ -72,6 +72,10 @@ class Pay(object):
         config = dict(app.config['GOVUK_PAY'])
         self.base_url = config.get('base_url')
         self.api_key = config.get('api_key')
+        self.disabled = config.get('disabled')
+
+        if self.disabled:
+            return
 
         assert self.base_url, "Missing GOVUK_PAY base_url setting"
         assert self.api_key, "Missing GOVUK_PAY api_key setting"
@@ -89,6 +93,9 @@ class Pay(object):
 
         if ref is None:
             ref = payment_reference()
+
+        if self.disabled:
+            raise PaymentError('Pay module is disabled')
 
         r = requests.post(
             '{}/v1/payments'.format(self.base_url),
@@ -113,6 +120,9 @@ class Pay(object):
         return payment
 
     def update_status(self, payment):
+
+        if self.disabled:
+            raise PaymentError('Pay module is disabled')
 
         r = requests.get(
             payment.url,
