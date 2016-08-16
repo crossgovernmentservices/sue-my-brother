@@ -41,12 +41,13 @@ GOVUK_PAY = {
     'api_key': env.get('GOVUK_PAY_API_KEY')
 }
 
-OIDC = {
-    'disabled': 'OIDC_ISSUER' not in env,
-    'type': 'web',
-    'issuer': env.get('OIDC_ISSUER'),
-    'client_id': env.get('OIDC_CLIENT_ID'),
-    'client_secret': env.get('OIDC_CLIENT_SECRET'),
+OIDC_PROVIDERS = {
+    'dex': {
+        'discovery_url': env.get('OIDC_ISSUER'),
+        'client_id': env.get('OIDC_CLIENT_ID'),
+        'client_secret': env.get('OIDC_CLIENT_SECRET'),
+        'redirect_uri': None
+    }
 }
 
 # XXX This should be True when served over HTTPS
