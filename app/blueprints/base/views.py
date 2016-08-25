@@ -323,11 +323,8 @@ def update_user(user):
     admin_role = user_datastore.find_role('admin')
 
     with make_admin_permission.require():
-        if 'superadmin' in request.form:
-            user.is_superadmin = bool(request.form['superadmin'])
-
-        if 'accept_suits' in request.form:
-            user.can_accept_suits = bool(request.form['accept_suits'])
+        user.is_superadmin = bool(request.form['superadmin'])
+        user.can_accept_suits = bool(request.form['accept_suits'])
 
         if 'admin' in request.form:
             make_admin = bool(request.form['admin'])
