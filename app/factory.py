@@ -104,10 +104,10 @@ def register_extensions(app):
 
     from flask_security import Security
     from app.extensions import user_datastore
-    from app.blueprints.base.models import Role, User
+    from app.blueprints.base.models import AnonymousUser, Role, User
     user_datastore.role_model = Role
     user_datastore.user_model = User
-    Security(app, user_datastore)
+    Security(app, user_datastore, anonymous_user=AnonymousUser)
 
     from app.extensions import notify
     notify.init_app(app)

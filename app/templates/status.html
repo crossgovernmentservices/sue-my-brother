@@ -2,14 +2,8 @@
 
 {% block body_content %}
 
-  {% set plural="" %}
+  <h1 class="heading-large">Status of your lawsuit</h1>
 
-  <h1 class="heading-large">Status of your lawsuit{% if suits|length > 1 %}s{% endif %}</h1>
-
-  <ul>
-  {% for suit in suits %}
-
-  <li>
   <p>
     The lawsuit you filed 
     <strong class="bold-small">{{ suit.created|humanize() }}</strong>
@@ -28,9 +22,6 @@
     {%- endif -%}
   </p>
   </li>
-
-  {% endfor %}
-  </ul>
 
   <a href="{{ url_for('base.start_suit') }}" class="button">Start new suit</a>
 

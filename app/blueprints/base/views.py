@@ -27,6 +27,24 @@ from app.extensions import db, notify, oidc, pay, user_datastore
 base = Blueprint('base', __name__)
 
 
+def get_current_user():
+    user = current_user
+
+    if not user.is_authenticated:
+        if 'user' in session and session['user']:
+            user.update(**session['user'])
+
+    return user
+
+
+def set_current_user(user):
+    if not user.is_authenticated:
+        session['user'] = {
+            'email': user.email,
+            'mobile': user.mobile,
+            'name': user.name}
+
+
 def sanitize_url(url):
 
     if url:
@@ -53,6 +71,7 @@ def login():
 @base.route('/logout')
 def logout():
     logout_user()
+    set_current_user(None)
     return redirect(url_for('.index'))
 
 
@@ -94,79 +113,79 @@ def add_role(role, user):
     return user
 
 
+def current_suit(user):
+    return Suit.query.join(User, Suit.plaintiff_id == User.id).filter(
+        User.name == user.name,
+        User.email == user.email
+    ).order_by(desc(Suit.created)).first()
+
+
 @base.route('/')
 def index():
-    print('index')
-
-    suit = current_suit(current_user)
+    suit = current_suit(get_current_user())
     if suit:
-        return redirect(url_for('.status'))
+        return redirect(url_for('.status', suit=suit.id))
 
     return render_template('index.html')
 
 
-# @base.route('/login')
-# @login_required
-# def login():
-    # "login redirects to OIDC provider"
-    # return redirect(url_for('.details'))
-
-
 @base.route('/details', methods=['GET', 'POST'])
 @base.route('/details/<action>', methods=['GET', 'POST'])
-@login_required
 def details(action='set'):
 
     form = DetailsForm()
 
-    user_name = getattr(current_user, 'name', None)
+    user = get_current_user()
+    user_name = getattr(user, 'name', None)
 
     if user_name:
 
         if action == 'set':
-            suit = current_suit(current_user)
+            suit = current_suit(user)
 
             if suit:
-                return redirect(url_for('.status'))
+                return redirect(url_for('.status', suit=suit.id))
 
             return redirect(url_for('.start_suit'))
 
     if form.validate_on_submit():
-        current_user.update(**form.data)
+        user.update(**form.data)
+        set_current_user(user)
 
         return redirect(url_for('.start_suit'))
 
     form.name.data = user_name
-    form.email.data = getattr(current_user, 'email', '')
-    form.mobile.data = getattr(current_user, 'mobile', '')
+    form.email.data = getattr(user, 'email', '')
+    form.mobile.data = getattr(user, 'mobile', '')
 
     return render_template('details.html', form=form)
 
 
 @base.route('/start')
-@login_required
 def start():
 
-    suit = current_suit(current_user)
+    suit = current_suit(get_current_user())
     if suit:
-        return redirect(url_for('.status'))
+        return redirect(url_for('.status', suit=suit.id))
 
     return redirect(url_for('.start_suit'))
 
 
 @base.route('/start-suit', methods=['GET', 'POST'])
-@login_required
 def start_suit():
 
     form = SuitForm()
 
+    user = get_current_user()
+
     if form.validate_on_submit():
+        plaintiff, _ = User.get_or_create(name=user.name, email=user.email)
         brother, _ = User.get_or_create(name=form.brothers_name.data)
 
         if form.brothers_mobile.data:
             brother.update(mobile=form.brothers_mobile.data)
 
-        suit = Suit(plaintiff=current_user, defendant=brother)
+        suit = Suit(plaintiff=plaintiff, defendant=brother)
         suit.save()
 
         return redirect(url_for('.make_payment'))
@@ -175,9 +194,8 @@ def start_suit():
 
 
 @base.route('/pay', methods=['GET', 'POST'])
-@login_required
 def make_payment():
-    suit = current_suit(current_user)
+    suit = current_suit(get_current_user())
 
     if request.method == 'POST':
 
@@ -203,16 +221,9 @@ def make_payment():
     return render_template('pay.html')
 
 
-def current_suit(user):
-    if user.is_authenticated:
-        return Suit.query.filter(
-            Suit.plaintiff == user).order_by(desc(Suit.created)).first()
-
-
 @base.route('/confirm/<uid>')
-@login_required
 def confirm(uid):
-    suit = current_suit(current_user)
+    suit = current_suit(get_current_user())
 
     if uid not in session or session[uid] != suit.payment.reference:
         abort(404)
@@ -227,14 +238,13 @@ def confirm(uid):
 
     flash('Payment successful. Lawsuit filed.')
 
-    return redirect(url_for('.status'))
+    return redirect(url_for('.status', suit=suit.id))
 
 
-@base.route('/status')
-@login_required
-def status():
-    suits = Suit.query.filter(Suit.confirmed.isnot(None)).all()
-    return render_template('status.html', suits=suits)
+@base.route('/status/<suit>')
+def status(suit):
+    suit = Suit.get_or_404(id=suit)
+    return render_template('status.html', suit=suit)
 
 
 @base.route('/admin')

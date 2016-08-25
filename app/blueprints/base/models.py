@@ -5,7 +5,11 @@ Base models
 
 import datetime
 
-from flask_security import RoleMixin, UserMixin
+from flask import abort
+from flask_security import (
+    AnonymousUser as BaseAnonymousUser,
+    RoleMixin,
+    UserMixin)
 
 from app.extensions import db, pay
 from lib.model_utils import GetOr404Mixin, GetOrCreateMixin, UpdateMixin
@@ -38,6 +42,28 @@ class User(db.Model, UserMixin, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
         'Role',
         secondary=user_roles,
         backref=db.backref('users', lazy='dynamic'))
+
+
+class AnonymousUser(BaseAnonymousUser):
+
+    def __init__(self, *args, **kwargs):
+        super(AnonymousUser, self).__init__(*args, **kwargs)
+        self.email = kwargs.get('email')
+        self.name = kwargs.get('name')
+        self.mobile = kwargs.get('mobile')
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        return cls(**kwargs), True
+
+    @classmethod
+    def get_or_404(cls, **kwargs):
+        abort(404)
+
+    def update(self, *args, **kwargs):
+        self.email = kwargs.get('email', self.email)
+        self.mobile = kwargs.get('mobile', self.mobile)
+        self.name = kwargs.get('name', self.name)
 
 
 class Suit(db.Model, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
