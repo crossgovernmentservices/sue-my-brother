@@ -42,6 +42,8 @@ class User(db.Model, UserMixin, GetOrCreateMixin, GetOr404Mixin, UpdateMixin):
         'Role',
         secondary=user_roles,
         backref=db.backref('users', lazy='dynamic'))
+    is_superadmin = db.Column(db.Boolean, default=False)
+    can_accept_suits = db.Column(db.Boolean, default=False)
 
 
 class AnonymousUser(BaseAnonymousUser):

@@ -34,13 +34,17 @@
               {%- if suit.accepted -%}
                 <span class="accepted">Accepted</span>
               {%- else -%}
+                {% if can_accept_suit %}
                 <form method="post" action="{{ url_for('base.accept', suit=suit.id) }}">
                   <button class="button">Accept</button>
                 </form>
+                {% endif %}
               {%- endif -%}
+              {% if can_accept_suit %}
               <form method="post" action="{{ url_for('base.reject', suit=suit.id) }}">
                 <button class="secondary button">Reject</button>
               </form>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
