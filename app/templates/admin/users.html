@@ -13,8 +13,9 @@
             <th>Name</th>
             <th>Email</th>
             <th>Mobile</th>
-            <th>Active</th>
             <th>Admin</th>
+            <th>Can accept</th>
+            <th>SuperAdmin</th>
             <th></th>
           </tr>
         </thead>
@@ -22,17 +23,31 @@
         {% for user in users %}
           <tr>
             <form method="post" action="{{ url_for('base.update_user', user=user.id) }}">
-              <td><input name="name" value="{{ user.name }}"></td>
-              <td><input name="email" value="{{ user.email }}"></td>
-              <td><input name="mobile" value="{{ user.mobile }}"></td>
+              <td><input name="name" value="{% if user.name %}{{ user.name }}{% endif %}"></td>
+              <td><input name="email" value="{% if user.email %}{{ user.email }}{% endif %}"></td>
+              <td><input name="mobile" value="{% if user.mobile %}{{ user.mobile }}{% endif %}"></td>
               <td>
-                <input name="active" type="checkbox" {%- if user.active %}checked="checked"{%- endif -%}>
+                {% if can_make_admin %}
+                <input name="admin" value="1" type="checkbox" {% if user.has_role('admin') %}checked="checked"{%- endif -%}>
+                <input name="admin" value="" type="hidden">
+                {% else %}
+                  {%- if user.has_role('admin') %}✓{%- endif -%}
+                {% endif %}
               </td>
               <td>
                 {% if can_make_admin %}
-                <input name="admin" value="1" type="checkbox" {%- if user.has_role('admin') %}checked="checked"{%- endif -%}>
+                <input name="accept_suits" value="1" type="checkbox" {% if user.can_accept_suits %}checked="checked"{%- endif -%}>
+                <input name="accept_suits" value="" type="hidden">
                 {% else %}
-                  {%- if user.has_role('admin') %}✓{%- endif -%}
+                  {%- if user.can_accept_suits %}✓{%- endif -%}
+                {% endif %}
+              </td>
+              <td>
+                {% if can_make_admin %}
+                <input name="superadmin" value="1" type="checkbox" {% if user.is_superadmin %}checked="checked"{%- endif -%}>
+                <input name="superadmin" value="" type="hidden">
+                {% else %}
+                  {%- if user.is_superadmin %}✓{%- endif -%}
                 {% endif %}
               </td>
               <td>

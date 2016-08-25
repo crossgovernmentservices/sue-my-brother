@@ -311,27 +311,36 @@ def admin_users():
 def update_user(user):
     user = user_datastore.get_user(user)
 
-    user.update(
-        name=request.form['name'].strip(),
-        email=request.form['email'].strip(),
-        mobile=request.form['mobile'].strip(),
-        active=bool(request.form['active'].strip())
-    )
+    if request.form['name']:
+        user.name = request.form['name'].strip()
+
+    if request.form['email']:
+        user.email = request.form['email'].strip()
+
+    if request.form['mobile']:
+        user.mobile = request.form['mobile'].strip()
 
     admin_role = user_datastore.find_role('admin')
 
     with make_admin_permission.require():
+        if 'superadmin' in request.form:
+            user.is_superadmin = bool(request.form['superadmin'])
 
-        make_admin = bool(request.form['admin'])
-        if not user.has_role('admin'):
+        if 'accept_suits' in request.form:
+            user.can_accept_suits = bool(request.form['accept_suits'])
 
-            if make_admin:
-                user_datastore.add_role_to_user(user, admin_role)
-                flash('Made {} an admin'.format(user.name))
+        if 'admin' in request.form:
+            make_admin = bool(request.form['admin'])
 
-        elif not make_admin:
-            user_datastore.remove_role_from_user(user, admin_role)
-            flash('Made {} not an admin'.format(user.name))
+            if not user.has_role('admin'):
+
+                if make_admin:
+                    user_datastore.add_role_to_user(user, admin_role)
+                    flash('Made {} an admin'.format(user.name))
+
+            elif not make_admin:
+                user_datastore.remove_role_from_user(user, admin_role)
+                flash('Made {} not an admin'.format(user.name))
 
     db.session.commit()
 

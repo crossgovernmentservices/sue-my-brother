@@ -49,12 +49,14 @@ def add_users():
     admin = user_datastore.find_or_create_role('admin')
     with open('users.txt') as f:
         users = (line.split(',') for line in f.readlines())
-        for email, password in users:
+        for email, password, can_make_admin, can_accept in users:
             user = user_datastore.find_user(email=email.strip())
             if not user:
                 user = user_datastore.create_user(
                     email=email.strip(),
-                    roles=[admin])
+                    roles=[admin],
+                    is_superadmin=can_make_admin.strip() == '1',
+                    can_accept_suits=can_accept.strip() == '1')
             user.active = True
             user.password = encrypt_password(password.strip())
             user_datastore.put(user)
