@@ -43,7 +43,7 @@ def get_current_user():
 
 
 def set_current_user(user):
-    if not user.is_authenticated:
+    if user and not user.is_authenticated:
         session['user'] = {
             'email': user.email,
             'mobile': user.mobile,
@@ -76,7 +76,7 @@ def login():
 @base.route('/logout')
 def logout():
     logout_user()
-    set_current_user(None)
+    set_current_user(current_user)
     return redirect(url_for('.index'))
 
 
