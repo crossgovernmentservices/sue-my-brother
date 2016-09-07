@@ -95,5 +95,7 @@ python manage.py add_users
 
 eval "$(python manage.py set_env)"
 
+python manage.py install_all_govuk_assets
+
 python manage.py runserver_ssl
 ```
