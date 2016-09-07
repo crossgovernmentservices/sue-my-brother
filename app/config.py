@@ -55,7 +55,9 @@ OIDC_COOKIE_SECURE = False
 
 OIDC_GOOGLE_APPS_DOMAIN = env.get('OIDC_GOOGLE_APPS_DOMAIN')
 
-SECRET_KEY = env.get('SECRET_KEY', b'\x07\x7f\x02p\xf4\xa0\xe8\xc0lA\x9e\xdbK\xdb\x1b\xd3\x81=\x1d\xec\\\xd7\xbe\x06')
+SECRET_KEY = env.get(
+    'SECRET_KEY',
+    b'p{\xa7\x18K\rB\x06\xc5\xbdK?\xe5\xdb\xde\x02P\xd0,\x14\xe50\x07\xdd')
 
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(

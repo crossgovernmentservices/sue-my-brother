@@ -20,7 +20,7 @@ manager.add_command('install_all_govuk_assets', ManageGovUkAssets())
 
 
 suites = {
-    'all': ['--start-live-server'],
+    'all': ['--pyargs', 'tests', '--start-live-server'],
     'coverage': ['--pyargs', 'tests.spec', '--cov=app', '--cov-report=html']
 }
 
@@ -29,7 +29,11 @@ suites = {
     'suite', default='all', nargs='?', choices=suites.keys(),
     help='Specify test suite to run (default all)')
 @manager.option('--spec', action='store_true', help='Output in spec style')
-def test(spec, suite):
+@manager.option(
+    '--watch',
+    action='store_true',
+    help='Run tests on file changes')
+def test(spec, watch, suite):
     """Runs tests"""
     args = []
 
@@ -40,6 +44,10 @@ def test(spec, suite):
         suite = 'all'
 
     args.extend(suites[suite])
+
+    if watch:
+        import pytest_watch
+        return pytest_watch.command.main(['--'] + args)
 
     return pytest.main(args)
 

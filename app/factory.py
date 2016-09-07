@@ -5,7 +5,7 @@ Sue My Brother app factory class
 
 import os
 
-from flask import Flask, redirect, render_template, request
+from flask import Flask, render_template
 
 
 def create_app(config='config.py', **kwargs):
