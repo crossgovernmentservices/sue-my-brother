@@ -342,3 +342,19 @@ def update_user(user):
     db.session.commit()
 
     return redirect(url_for('.admin_users'))
+
+
+@base.route('/admin/users/<user>/delete', methods=['POST'])
+@login_required
+@roles_required('admin')
+def delete_user(user):
+    user_id = user
+    user = user_datastore.get_user(user)
+
+    with make_admin_permission.require():
+        user_datastore.delete_user(user)
+        flash('Deleted user #{}'.format(user_id))
+
+    db.session.commit()
+
+    return redirect(url_for('.admin_users'))

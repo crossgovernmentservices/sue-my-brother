@@ -54,6 +54,9 @@
                 <button class="secondary button">Update</button>
               </td>
             </form>
+            <form method="post" action="{{ url_for('base.delete_user', user=user.id) }}">
+              <td><button class="secondary button">Delete</button></td>
+            </form>
           </tr>
         {% endfor %}
         </tbody>
