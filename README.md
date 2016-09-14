@@ -67,6 +67,7 @@ Create a file in the project directory, called `notify.env`, replacing
 
 ```
 GOVUK_NOTIFY_BASE_URL=https://api.notifications.service.gov.uk
+GOVUK_NOTIFY_SERVICE_URL=https://www.notifications.service.gov.uk
 GOVUK_NOTIFY_API_KEY=<your-api-key>
 GOVUK_NOTIFY_SERVICE_ID=<your-service-id>
 ```
