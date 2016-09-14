@@ -62,3 +62,7 @@ nav.admin {
   @extend .error-summary;
   border-color: $button-colour;
 }
+
+.flush--top {
+  margin-top: 0;
+}
