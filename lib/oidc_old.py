@@ -20,7 +20,7 @@ def verify_id_token(token, config):
     key = keys.get(header['kid'])
 
     if not key:
-        raise KeyNotFound()
+        raise KeyNotFound(header["kid"])
 
     return jwt.decode(token, key, audience=config['client_id'])
 

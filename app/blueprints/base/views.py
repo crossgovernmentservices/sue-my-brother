@@ -85,6 +85,8 @@ def logout():
 def oidc_callback():
     user_info = oidc.authenticate('dex', request)
 
+    session["iat"] = user_info["iat"]
+
     user = user_datastore.get_user(user_info['email'])
 
     if not user:
@@ -105,7 +107,9 @@ def create_user(user_info):
     email = user_info['email']
 
     user = add_role('USER', user_datastore.create_user(
-        email=email))
+        email=email,
+        issuer_id=user_info["iss"],
+        subject_id=user_info["sub"]))
 
     user_datastore.commit()
 

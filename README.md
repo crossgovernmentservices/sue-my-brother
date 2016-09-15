@@ -159,7 +159,7 @@ If running against an active identity management service
 python manage.py runserver_ssl
 ```
 
-## Quickstart - running sue-my-brother agaist local instance of dex
+## Quickstart - running sue-my-brother against local instance of dex
 
 ```
 git clone https://github.com/crossgovernmentservices/csd-identity-products.git

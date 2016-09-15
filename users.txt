@@ -4,3 +4,4 @@ tom.dolan@digital.cabinet-office.gov.uk,password,0,1
 colm.britton@digital.cabinet-office.gov.uk,password,1,1
 abisola.fatokun@digital.cabinet-office.gov.uk,password,0,0
 simon.everest@digital.cabinet-office.gov.uk,password,0,0
+ken.tsang@digital.cabinet-office.gov.uk,password,1,1

@@ -1,3 +1,6 @@
+import contextlib
+import datetime
+import mock
 import os
 import subprocess
 
@@ -151,3 +154,14 @@ def unnamed_user_logged_in(unnamed_user, login):
 def logged_in(test_user, login):
     login(test_user)
     yield test_user
+
+
+@pytest.fixture
+def utcnow():
+    @contextlib.contextmanager
+    def patch_now(module, val):
+        with mock.patch(module) as dt:
+            dt.utcnow.return_value = val
+            dt.side_effect = datetime.datetime
+            yield
+    return patch_now
