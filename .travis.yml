@@ -3,8 +3,10 @@ dist: trusty
 language: python
 python:
   - '3.5'
+ruby:
+  - '2.2.3'
 install: pip install --use-wheel -r requirements.txt
-script: python manage.py test
+script: python manage.py build_and_test
 env:
   global:
     - TRAVIS_CI=True
