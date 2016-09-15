@@ -122,7 +122,7 @@ def build_and_test():
     with travis_fold('install_all_govuk_assets'):
         manager.handle('', ['install_all_govuk_assets', '--clean'])
 
-    return test(spec=True)
+    return test(spec=True, watch=False, suite='all')
 
 if __name__ == '__main__':
     manager.run()
