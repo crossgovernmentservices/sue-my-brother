@@ -52,7 +52,7 @@ class WhenGettingStarted(object):
 
     def it_shows_a_call_to_action(self, index):
         links = index.soup.find_all('a', href=url_for('base.details'))
-        assert 'Get started' in links[0].text
+        assert 'Sue him now' in links[0].text
 
     def it_requests_user_details_if_unrecognized(self, details_form):
         heading = details_form.soup.find('h1')
