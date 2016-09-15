@@ -2,6 +2,57 @@
 
 Dummy app to integrate with various GaaP services
 
+## Recommendation
+
+It is possible to install libraries using other means but in this set up for sue-my-brother homebrew was used
+
+### Homebrew
+
+```
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+## Pre-requisites for sue-my-brother
+
+### Python, pip and virtualenvwrapper
+
+```
+	brew install python3
+	sudo easy_install pip
+	sudo easy_install virtualenvwrapper
+
+	mkvirtualenv smb --python=`which python3`
+
+	pip install -r requirements.txt
+```
+
+### Append to bash_profile
+
+```
+source /usr/local/bin/virtualenvwrapper.sh
+```
+
+## Pre-requisites for running sue-my-brother with a local [Dex](https://github.com/coreos/dex) instance
+
+### Docker and Postgres
+
+Download and install [Docker](https://docs.docker.com/engine/installation/)
+
+Download and install [PostgresSQL](https://www.postgresql.org/download/)
+
+### Append to bash_profile
+
+```
+export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/9.5/bin
+```
+
+### Ruby
+
+```
+	gem install bundle
+	rbenv install 2.2.0
+	
+```
 
 ## Dependencies
 
@@ -16,6 +67,7 @@ Create a file in the project directory, called `notify.env`, replacing
 
 ```
 GOVUK_NOTIFY_BASE_URL=https://api.notifications.service.gov.uk
+GOVUK_NOTIFY_SERVICE_URL=https://www.notifications.service.gov.uk
 GOVUK_NOTIFY_API_KEY=<your-api-key>
 GOVUK_NOTIFY_SERVICE_ID=<your-service-id>
 ```
@@ -56,7 +108,7 @@ You will need a Pay account - currently you will need to request this via their
 Create an API key, and create a file in the project directory called `pay.env`:
 
 ```
-GOVUK_PAY_BASE_URL=https://publicapi.pymnt.uk
+GOVUK_PAY_BASE_URL=https://publicapi.integration.pymnt.uk
 GOVUK_PAY_API_KEY=<your-api-key>
 ```
 
@@ -89,11 +141,77 @@ git clone https://github.com/crossgovernmentservices/sue-my-brother
 
 pip install -r requirements.txt
 
+update users.txt to add your log in details
+
 python manage.py db upgrade
 
 python manage.py add_users
 
 eval "$(python manage.py set_env)"
 
+python manage.py install_all_govuk_assets
+
+```
+
+If running against an active identity management service
+
+```
 python manage.py runserver_ssl
+```
+
+## Quickstart - running sue-my-brother agaist local instance of dex
+
+```
+git clone https://github.com/crossgovernmentservices/csd-identity-products.git
+
+cd csd-identity-products/products/dex/docker-compose
+docker-compose up
+```
+
+In another window 
+
+```
+docker exec -it dockercompose_overlord_1 /opt/dex/bin/dexctl --db-url postgres://user:password@postgres:5432/user?sslmode=disable set-connector-configs /opt/dex/connectors/connectors.json
+```
+
+Generate keys
+
+```
+docker exec -it dockercompose_overlord_1 /opt/dex/bin/dexctl --db-url postgres://user:password@postgres:5432/user?sslmode=disable new-client https://localhost:5443/oidc_callback
+```
+
+Copy and append output to oidc.env file in sue-my-brother directory,
+2 keys to copy
+
+```
+DEX_APP_CLIENT_ID=<your-client-id>
+DEX_APP_CLIENT_SECRET=<your-client-secret>
+```
+
+NB - you will need to replace DEX_APP with OIDC and add the following
+
+```
+OIDC_ISSUER=http://dex.example.com:5556
+```
+
+The hosts file will also need the following line added
+```
+0.0.0.0         dex.example.com
+```
+
+The environment variables will need to be updated (necessary whenever .env file is changed)
+
+```
+eval "$(python manage.py set_env)"
+```
+
+Start the website 
+```
+python manage.py runserver_ssl
+```
+
+### Test the website
+
+```
+https://localhost:5443/
 ```
