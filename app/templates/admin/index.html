@@ -2,6 +2,8 @@
 
 {% block admin_content %}
 
+  You last signed in {{ session["iat"]|prettydate }}
+
   <h1 class="heading-large">Suits</h1>
 
   <div class="grid-row section">
