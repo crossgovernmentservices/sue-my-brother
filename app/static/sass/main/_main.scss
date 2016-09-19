@@ -1,7 +1,19 @@
-.sign-out {
-  float: right;
+$gutter-third: $gutter / 3;
+
+.sign-out-container {
+  text-align: right;
   margin-top: 10px;
-  font-size: 16px;
+  border-top: 1px solid $border-colour;
+  border-bottom: 1px solid $border-colour;
+  padding: $gutter-half 0 $gutter-third;
+  .user-name {
+    margin: 0;
+  }
+  span,
+  .user-auth-status {
+    font-size: 16px;
+    color: $secondary-text-colour;
+  }
 }
 
 .user-details {
@@ -66,3 +78,5 @@ nav.admin {
 .flush--top {
   margin-top: 0;
 }
+
+

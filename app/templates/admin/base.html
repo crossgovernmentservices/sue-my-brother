@@ -2,11 +2,6 @@
 
 {% block body_content %}
 
-  <nav class="admin">
-    <a href="{{ url_for('base.admin') }}">Suits</a> |
-    <a href="{{ url_for('base.admin_users') }}">Users</a>
-  </nav>
-
   {% block admin_content %}{% endblock %}
 
 {% endblock %}
