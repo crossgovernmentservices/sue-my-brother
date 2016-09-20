@@ -122,6 +122,7 @@ class WhenAcceptingASuitOutsideAuthenticatedTime(object):
     @patch('time.time', mock_time_more_than_max_age)
     def it_redirects_to_identity_broker(
             self, test_admin_user, client, test_suit,
+            mock_views_current_app_config,
             mock_oidc_current_app_config):
 
         with client.session_transaction() as session:
