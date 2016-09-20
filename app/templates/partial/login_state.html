@@ -1,6 +1,10 @@
 <div class="sign-out-container">
   {% if current_user.is_authenticated -%}
 
+  {% if current_user.has_role('admin') -%}
+  <span class="admin-user">Admin user</span>
+  {% endif %}
+
   <h3 class="heading-small user-name">{{ current_user.name|default(current_user.email) }}</h3>
   <div class="user-auth-status">
     You last signed in {{ session["iat"]|prettydate }}

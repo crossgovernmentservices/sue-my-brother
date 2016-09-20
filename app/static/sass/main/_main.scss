@@ -1,6 +1,7 @@
 $gutter-third: $gutter / 3;
 
 .sign-out-container {
+  position: relative;
   text-align: right;
   margin-top: 10px;
   border-top: 1px solid $border-colour;
@@ -13,6 +14,15 @@ $gutter-third: $gutter / 3;
   .user-auth-status {
     font-size: 16px;
     color: $secondary-text-colour;
+  }
+  .admin-user {
+    position: absolute;
+    left: 0;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 48px;
+    color: $grey-2;
+    line-height: 71px;
   }
 }
 
