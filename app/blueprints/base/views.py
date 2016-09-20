@@ -125,7 +125,6 @@ def add_role(role, user):
 
 def current_suit(user):
     return Suit.query.join(User, Suit.plaintiff_id == User.id).filter(
-        User.name == user.name,
         User.email == user.email
     ).order_by(desc(Suit.created)).first()
 
@@ -189,7 +188,9 @@ def start_suit():
     user = get_current_user()
 
     if form.validate_on_submit():
-        plaintiff, _ = User.get_or_create(name=user.name, email=user.email)
+        plaintiff, _ = User.get_or_create(email=user.email)
+        if user.name:
+            plaintiff.name = user.name
         brother, _ = User.get_or_create(name=form.brothers_name.data)
 
         if form.brothers_mobile.data:
@@ -242,9 +243,10 @@ def confirm(uid):
 
     suit.update(confirmed=datetime.datetime.utcnow())
 
-    notify['sms'].send_sms(
-        suit.defendant.mobile,
-        plaintiff=suit.plaintiff.name)
+    if suit.defendant.mobile:
+        notify['sms'].send_sms(
+            suit.defendant.mobile,
+            plaintiff=suit.plaintiff.name)
 
     flash('Payment successful. Lawsuit filed.')
 
