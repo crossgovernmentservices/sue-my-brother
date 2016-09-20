@@ -44,7 +44,8 @@
       {% if current_user.has_role('admin') -%}
       <nav class="admin">
         Admin options:
-        <a href="{{ url_for('base.admin') }}">Suits</a> |
+        <a href="{{ url_for('base.admin') }}">Home</a> |
+        <a href="{{ url_for('base.admin_suits') }}">Suits</a> |
         <a href="{{ url_for('base.admin_users') }}">Users</a>
       </nav>
       {%- endif %}

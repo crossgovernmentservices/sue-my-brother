@@ -264,9 +264,15 @@ def pretty_date(date):
 @login_required
 @roles_required('admin')
 def admin():
+    return render_template('admin/index.html')
+
+@base.route('/admin/suits')
+@login_required
+@roles_required('admin')
+def admin_suits():
     suits = Suit.query.all()
     return render_template(
-        'admin/index.html',
+        'admin/suits.html',
         suits=suits,
         can_accept_suit=accept_suit_permission.can())
 
