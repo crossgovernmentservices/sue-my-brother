@@ -1,6 +1,7 @@
 import datetime
 from urllib.parse import unquote, urlparse, urlunparse
 import uuid
+import humanize
 
 from flask import (
     Blueprint,
@@ -255,14 +256,23 @@ def status(suit):
     suit = Suit.get_or_404(id=suit)
     return render_template('status.html', suit=suit)
 
+@base.app_template_filter("prettydate")
+def pretty_date(date):
+  return humanize.naturaltime(datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
 
 @base.route('/admin')
 @login_required
 @roles_required('admin')
 def admin():
+    return render_template('admin/index.html')
+
+@base.route('/admin/suits')
+@login_required
+@roles_required('admin')
+def admin_suits():
     suits = Suit.query.all()
     return render_template(
-        'admin/index.html',
+        'admin/suits.html',
         suits=suits,
         can_accept_suit=accept_suit_permission.can())
 

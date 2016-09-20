@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+
+  <h1 class="heading-large">Suits</h1>
+
+  <div class="grid-row section">
+    <div class="column-full">
+
+      <table class="suits">
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Plaintiff</th>
+            <th>Defendant</th>
+            <th>Payment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for suit in suits %}
+          <tr>
+            <td>{{ "{:%d-%m-%Y %H:%M}".format(suit.created) }}</td>
+            <td>{{ suit.plaintiff.name }}</td>
+            <td>{{ suit.defendant.name }}</td>
+            <td>
+              {%- if suit.payment_id -%}
+                {{ suit.payment.status }}
+              {%- else -%}
+                Not paid
+              {%- endif -%}
+            </td>
+            <td>
+              {%- if suit.accepted -%}
+                <span class="accepted">Accepted</span>
+              {%- else -%}
+                {% if can_accept_suit %}
+                <form method="post" action="{{ url_for('base.accept', suit=suit.id) }}">
+                  <button class="button">Accept</button>
+                </form>
+                {% endif %}
+              {%- endif -%}
+              {% if can_accept_suit %}
+              <form method="post" action="{{ url_for('base.reject', suit=suit.id) }}">
+                <button class="secondary button">Reject</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+
+{% endblock %}

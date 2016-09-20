@@ -1,12 +1,18 @@
-<div class="sign-out">
+<div class="sign-out-container">
   {% if current_user.is_authenticated -%}
 
-  <span class="user-name">{{ current_user.name|default(current_user.email) }}</span>
-  <a href="{{ url_for('base.details', action='edit') }}">Edit details</a> |
   {% if current_user.has_role('admin') -%}
-  <a href="{{ url_for('base.admin') }}">Admin</a> |
-  {%- endif %}
-  <a href="{{ url_for_security('logout') }}">Sign out</a>
+  <span class="admin-user">Admin user</span>
+  {% endif %}
+
+  <h3 class="heading-small user-name">{{ current_user.name|default(current_user.email) }}</h3>
+  <div class="user-auth-status">
+    {% if auth_time %}
+    You last signed in {{ auth_time|prettydate }}
+    {% endif %}
+    (<a href="{{ url_for_security('logout') }}">Sign out</a>)
+  </div>
+  <span><a href="{{ url_for('base.details', action='edit') }}">Edit your details</a></span>
 
   {%- else -%}
 

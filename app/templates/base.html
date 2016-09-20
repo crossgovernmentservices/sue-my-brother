@@ -14,6 +14,18 @@
 
 {% block body_classes %}full-width{% endblock %}
 
+{% block header_class %}with-proposition{% endblock %}
+
+{% block proposition_header %}
+<div class='header-proposition'>
+  <div class='content'>
+    <nav id='proposition-menu'>
+      <a href='/' id='proposition-name'>Sue my brother</a>
+    </nav>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
   <div class="full-width-container">
     {% block top_banner %}
@@ -28,6 +40,15 @@
       {% include "partial/_messages.html" %}
 
       {% include "partial/login_state.html" %}
+
+      {% if current_user.has_role('admin') -%}
+      <nav class="admin">
+        Admin options:
+        <a href="{{ url_for('base.admin') }}">Home</a> |
+        <a href="{{ url_for('base.admin_suits') }}">Suits</a> |
+        <a href="{{ url_for('base.admin_users') }}">Users</a>
+      </nav>
+      {%- endif %}
 
       {% block body_content %}{% endblock %}
 
