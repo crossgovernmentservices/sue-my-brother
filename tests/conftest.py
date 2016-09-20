@@ -10,7 +10,7 @@ import sqlalchemy
 
 from app.blueprints.base.models import User
 from app.config import SQLALCHEMY_DATABASE_URI
-from app.extensions import db as _db
+from app.extensions import db as _db, user_datastore
 from app.factory import create_app
 
 
@@ -122,6 +122,18 @@ def test_user(db_session):
 
 
 @pytest.fixture
+def test_admin_user(db_session):
+    admin = user_datastore.find_or_create_role('admin')
+    user = user_datastore.create_user(
+        email="admin@example.com",
+        roles=[admin],
+        is_superadmin=True,
+        can_accept_suits=True)
+    user_datastore.commit()
+    return user
+
+
+@pytest.fixture
 def unnamed_user(db_session):
     user = User(email='test@example.com', active=True)
     db_session.add(user)
@@ -154,6 +166,12 @@ def unnamed_user_logged_in(unnamed_user, login):
 def logged_in(test_user, login):
     login(test_user)
     yield test_user
+
+
+@pytest.yield_fixture
+def admin_logged_in(test_admin_user, login):
+    login(test_admin_user)
+    yield test_admin_user
 
 
 @pytest.fixture

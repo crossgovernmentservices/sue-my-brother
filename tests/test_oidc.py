@@ -63,13 +63,6 @@ def mock_auth(claims):
         yield
 
 
-@pytest.yield_fixture
-def ds_spy():
-    with mock.patch("app.extensions.user_datastore") as ds:
-        ds.create_user = mock.Mock()
-        yield ds.create_user
-
-
 class WhenClientReceivesAnIDToken(object):
 
     def it_contains_an_auth_time_claim(self, claims):

@@ -5,7 +5,7 @@ OIDC client Flask extension
 
 from urllib.parse import urlencode
 
-from flask import url_for
+from flask import url_for, current_app
 from jose import jwt
 import requests
 
@@ -87,18 +87,24 @@ class OIDC(object):
 
         return self._config[provider_name]
 
-    def login(self, provider_name):
+    def login(self, provider_name, force_reauthentication=False):
         """
         Generate a login URL for a provider
         """
 
         config = self.openid_config(provider_name)
 
+        kw = {}
+        if force_reauthentication:
+            kw["prompt"] = "login"
+            kw["max_age"] = current_app.config.get("ACCEPT_SUIT_MAX_AGE")
+
         auth_request = AuthenticationRequest(
             scope='openid email profile',
             response_type='code',
             client_id=config['client_id'],
-            redirect_uri=config.get('redirect_uri') or self.callback_url)
+            redirect_uri=config.get('redirect_uri') or self.callback_url,
+            **kw)
 
         return auth_request.url(config['authorization_endpoint'])
 
