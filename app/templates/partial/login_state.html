@@ -7,7 +7,9 @@
 
   <h3 class="heading-small user-name">{{ current_user.name|default(current_user.email) }}</h3>
   <div class="user-auth-status">
-    You last signed in {{ session["iat"]|prettydate }}
+    {% if auth_time %}
+    You last signed in {{ auth_time|prettydate }}
+    {% endif %}
     (<a href="{{ url_for_security('logout') }}">Sign out</a>)
   </div>
   <span><a href="{{ url_for('base.details', action='edit') }}">Edit your details</a></span>

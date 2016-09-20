@@ -5,7 +5,7 @@ Sue My Brother app factory class
 
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 
 
 def create_app(config='config.py', **kwargs):
@@ -65,7 +65,8 @@ def register_context_processors(app):
     """
 
     def base_context_processor():
-        return {'asset_path': '/static/govuk_template/assets/'}
+        return {'asset_path': '/static/govuk_template/assets/',
+                'auth_time': session.get('iat')}
 
     app.context_processor(base_context_processor)
 
