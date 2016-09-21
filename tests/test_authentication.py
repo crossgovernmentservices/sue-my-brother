@@ -12,23 +12,24 @@ from app.blueprints.base.views import authenticated_within
 max_age = 50
 
 mock_time_more_than_max_age = Mock()
-mock_time_more_than_max_age.return_value = time.mktime(
-    datetime(2011, 6, 21, 10, 10, 0).timetuple())
+mock_time_more_than_max_age.return_value = (
+    time.mktime(datetime(2011, 6, 21, 10, 10, 0).timetuple()))
 
 mock_time_less_than_max_age = Mock()
-mock_time_less_than_max_age.return_value = time.mktime(
-    datetime(2011, 6, 21, 10, 0, max_age - 5).timetuple())
+mock_time_less_than_max_age.return_value = (
+    time.mktime(datetime(2011, 6, 21, 10, 0, max_age - 5).timetuple()))
 
 mock_session = Mock()
-mock_session = {'iat': time.mktime(
-    datetime(2011, 6, 21, 10, 0, 0).timetuple())}
+mock_session = {
+    'iat': time.mktime(datetime(2011, 6, 21, 10, 0, 0).timetuple())}
 
 mock_openid_config = Mock()
-mock_openid_config.return_value = {'authorization_endpoint':
-                                   'http://dex.example.com:5556/auth',
-                                   'discovery_url':
-                                   'http://dex.example.com:5556',
-                                   'client_id': None}
+mock_openid_config.return_value = {
+    'authorization_endpoint':
+    'http://dex.example.com:5556/auth',
+    'discovery_url':
+    'http://dex.example.com:5556',
+    'client_id': None}
 
 
 @pytest.yield_fixture
@@ -79,9 +80,6 @@ class WhenTimeSinceLastAuthenticatedIsMoreThanMaxAge(object):
     @patch('time.time', mock_time_more_than_max_age)
     def it_returns_false(self, client):
 
-        print(mock_session['iat'])
-        print(time.time())
-
         assert authenticated_within(max_age) is False
 
 
@@ -90,9 +88,6 @@ class WhenTimeSinceLastAuthenticatedIsLessThanMaxAge(object):
     @patch.dict('app.blueprints.base.views.session', mock_session)
     @patch('time.time', mock_time_less_than_max_age)
     def it_returns_true(self, client):
-
-        print(mock_session['iat'])
-        print(time.time())
 
         assert authenticated_within(max_age) is True
 
@@ -110,10 +105,8 @@ class WhenAcceptingASuitWithinAuthenticatedTime(object):
 
         response = client.post(url_for('base.accept', suit=test_suit.id))
 
-        print(response.headers["Location"])
         assert response.status_code == 302
-        assert ("/admin" in
-                response.headers["Location"])
+        assert "/admin" in response.headers["Location"]
 
 
 class WhenAcceptingASuitOutsideAuthenticatedTime(object):
@@ -132,7 +125,5 @@ class WhenAcceptingASuitOutsideAuthenticatedTime(object):
 
         response = client.post(url_for('base.accept', suit=test_suit.id))
 
-        print(response.headers["Location"])
         assert response.status_code == 302
-        assert ("prompt=login" in
-                response.headers["Location"])
+        assert "prompt=login" in response.headers["Location"]

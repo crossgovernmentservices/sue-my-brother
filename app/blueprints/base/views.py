@@ -66,17 +66,24 @@ def sanitize_url(url):
 
 def authenticated_within(max_age):
     auth_time = session["iat"]
-
     time_elapsed_since_authenticated = int(time.time()) - auth_time
     print("timeElapsed:" + str(time_elapsed_since_authenticated))
 
     return time_elapsed_since_authenticated <= max_age
 
 
-def force_authentication():
+def force_authentication(path=None):
     print("Force authentication")
-    session["next_url"] = request.full_path
+    request_path = request.full_path
+    if path is not None:
+        request_path = path
+    session["next_url"] = request_path
     return redirect(oidc.login("dex", force_reauthentication=True))
+
+
+@base.route('/reauthenticate/<path:caller>')
+def reauthenticate(caller=None):
+    return force_authentication(caller)
 
 
 @base.route('/login')
@@ -292,7 +299,6 @@ def accept(suit):
     suitObj = Suit.query.get(suit)
 
     max_age = current_app.config.get("ACCEPT_SUIT_MAX_AGE")
-
     if not authenticated_within(max_age):
         return force_authentication()
 
