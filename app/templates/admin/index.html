@@ -21,6 +21,9 @@
     <h2 class="heading-medium flush--top">Notify options</h2>
     <a href="{{ config["GOVUK_NOTIFY"]["service_url"] }}/services/{{ config["GOVUK_NOTIFY"]["client_id"] }}/dashboard">Update email and sms templates</a>
   </div>
+  <div>
+    <a href="{{ url_for('base.reauthenticate', caller='admin') }}">Reauthenticate</a>
+  </div>
 
   <hr />
 

@@ -72,6 +72,7 @@ if all(DB.values()):
 if 'DATABASE_URL' in env:
     SQLALCHEMY_DATABASE_URI = env.get('DATABASE_URL')
 
+ACCEPT_SUIT_MAX_AGE = 300
 
 # XXX Don't change the following settings unless necessary
 

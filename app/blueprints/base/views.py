@@ -1,4 +1,5 @@
 import datetime
+import time
 from urllib.parse import unquote, urlparse, urlunparse
 import uuid
 import humanize
@@ -6,6 +7,7 @@ import humanize
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     redirect,
     render_template,
@@ -61,6 +63,26 @@ def sanitize_url(url):
         url = urlunparse(parts[:6])
 
     return url
+
+
+def authenticated_within(max_age):
+    auth_time = session["iat"]
+    time_elapsed_since_authenticated = int(time.time()) - auth_time
+
+    return time_elapsed_since_authenticated <= max_age
+
+
+def force_authentication(path=None):
+    request_path = request.full_path
+    if path is not None:
+        request_path = path
+    session["next_url"] = request_path
+    return redirect(oidc.login("dex", force_reauthentication=True))
+
+
+@base.route('/reauthenticate/<path:caller>')
+def reauthenticate(caller=None):
+    return force_authentication(caller)
 
 
 @base.route('/login')
@@ -284,15 +306,20 @@ def admin_suits():
 @roles_required('admin')
 @accept_suit_permission.require()
 def accept(suit):
-    suit = Suit.query.get(suit)
-    suit.accepted = datetime.datetime.utcnow()
-    db.session.add(suit)
+    suit_obj = Suit.query.get(suit)
+
+    max_age = current_app.config.get("ACCEPT_SUIT_MAX_AGE")
+    if not authenticated_within(max_age):
+        return force_authentication()
+
+    suit_obj.accepted = datetime.datetime.utcnow()
+    db.session.add(suit_obj)
     db.session.commit()
 
     notify['accept'].send_email(
-        suit.plaintiff.email,
-        plaintiff=suit.plaintiff.name,
-        defendant=suit.defendant.name)
+        suit_obj.plaintiff.email,
+        plaintiff=suit_obj.plaintiff.name,
+        defendant=suit_obj.defendant.name)
 
     flash('Suit accepted')
     return redirect(url_for('.admin'))
