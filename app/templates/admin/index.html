@@ -35,3 +35,9 @@
   </div>
 
 {% endblock %}
+
+{% block body_end %}
+<script>var AUTH_MAX_AGE = {{ config["ACCEPT_SUIT_MAX_AGE"] }};</script>
+{{ super() }}
+{% endblock %}
+

@@ -12,8 +12,29 @@ $gutter-third: $gutter / 3;
   }
   span,
   .user-auth-status {
+    display: inline-block;
     font-size: 16px;
     color: $secondary-text-colour;
+    -webkit-transition: all 0.5s ease-in;
+    transition: all 0.5s ease-in;
+  }
+  .user-auth-status--warning,
+  .user-auth-status--reauth {
+    padding-right: 10px;
+  }
+  .user-auth-status--warning {
+    border-right: 5px solid $yellow;
+
+    .auth-msg--warning {
+      display: block;
+    }
+  }
+  .user-auth-status--reauth {
+    border-right: 5px solid $red;
+
+    .auth-msg--reauth {
+      display: block;
+    }
   }
   .admin-user {
     position: absolute;
@@ -23,6 +44,9 @@ $gutter-third: $gutter / 3;
     font-size: 48px;
     color: $grey-2;
     line-height: 71px;
+  }
+  .auth-msg {
+    display: none;
   }
 }
 
