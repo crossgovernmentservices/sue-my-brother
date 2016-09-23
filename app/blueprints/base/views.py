@@ -109,10 +109,17 @@ def oidc_callback():
 
     session["iat"] = user_info["iat"]
 
-    user = user_datastore.get_user(user_info['email'])
+    user = user_datastore.get_user(user_info.get(
+        'email', user_info.get('upn')))
 
     if not user:
         user = create_user(user_info)
+
+    user_name = getattr(user, 'name')
+    if user_name is None:
+        user_name = user_info.get('name')
+        user.name = user_name
+        db.session.commit()
 
     login_user(user)
 
@@ -126,7 +133,7 @@ def oidc_callback():
 
 
 def create_user(user_info):
-    email = user_info['email']
+    email = user_info.get('email', user_info.get('upn'))
 
     user = add_role('USER', user_datastore.create_user(
         email=email,
