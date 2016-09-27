@@ -147,7 +147,8 @@ class OIDC(object):
         response = request.send(config['token_endpoint'])
 
         if 'error' in response:
-            raise Exception(response['error'])
+            raise Exception(response['error'] + ", " +
+                            response.get("error_description"))
 
         return response
 
@@ -192,6 +193,8 @@ class TokenRequest(object):
         self._params = {
             'redirect_uri': redirect_uri,
             'code': code,
+            'client_id': client_id,
+            'client_secret': secret,
             'grant_type': grant_type}
 
     def send(self, token_endpoint):
