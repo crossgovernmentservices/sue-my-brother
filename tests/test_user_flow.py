@@ -56,7 +56,7 @@ class WhenGettingStarted(object):
 
     def it_requests_user_details_if_unrecognized(self, details_form):
         heading = details_form.soup.find('h1')
-        assert heading.text == 'Enter your details'
+        assert heading.text == 'Enter your own details'
 
 
 class WhenEnteringPlaintiffDetails(object):
@@ -72,12 +72,13 @@ class WhenEnteringPlaintiffDetails(object):
 
     def it_requires_a_full_name(self, post_details):
         errors = post_details({}).soup.find_all(class_='error')
-        assert errors[0].parent.parent.find('label').text == 'Full Name'
+        assert errors[0].parent.parent.find('label').text == 'Your Full Name'
 
     def it_requires_an_email_address(self, post_details):
         data = {'name': 'Test User'}
         errors = post_details(data).soup.find_all(class_='error')
-        assert errors[0].parent.parent.find('label').text == 'Email Address'
+        assert errors[0].parent.parent.find('label').text == \
+            'Your Email Address'
 
 
 class WhenEnteringSuitDetails(object):
