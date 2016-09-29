@@ -9,9 +9,9 @@ from wtforms.validators import DataRequired, InputRequired
 
 
 class DetailsForm(Form):
-    name = StringField('Full Name', validators=[InputRequired()])
-    email = StringField('Email Address', validators=[DataRequired()])
-    mobile = StringField('Mobile Phone Number')
+    name = StringField('Your Full Name', validators=[InputRequired()])
+    email = StringField('Your Email Address', validators=[DataRequired()])
+    mobile = StringField('Your Phone Number')
 
 
 class SuitForm(Form):
