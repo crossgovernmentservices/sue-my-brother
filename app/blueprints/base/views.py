@@ -7,6 +7,7 @@ import humanize
 from flask import (
     Blueprint,
     abort,
+    after_this_request,
     current_app,
     flash,
     redirect,
@@ -73,13 +74,40 @@ def authenticated_within(max_age):
 
 
 def force_authentication(path=None):
-    request_path = request.full_path
+    request_path = '/'
     if path is not None:
         request_path = path
     session["next_url"] = request_path
-    return redirect(oidc.login("dex", force_reauthentication=True))
+    return redirect(oidc.login(get_oidc_provider(),
+                               force_reauthentication=True))
 
 
+def get_oidc_provider():
+    oidc_provider = request.cookies.get('oidc_provider')
+    if oidc_provider is None:
+        oidc_provider = oidc.oidc_providers()[0]
+
+    return oidc_provider
+
+
+def set_oidc_provider_cookie(response, oidc_provider):
+    response.set_cookie('oidc_provider', oidc_provider)
+
+
+@base.route('/switch_oidc_provider/<path:caller>', methods=['GET', 'POST'])
+def switch_oidc_provider(caller):
+    oidc_provider = request.form["oidc_provider"]
+
+    @after_this_request
+    def remember_oidc_provider(response):
+        set_oidc_provider_cookie(response, oidc_provider)
+
+        return response
+
+    return redirect(url_for(caller))
+
+
+@base.route('/reauthenticate/')
 @base.route('/reauthenticate/<path:caller>')
 def reauthenticate(caller=None):
     return force_authentication(caller)
@@ -87,13 +115,13 @@ def reauthenticate(caller=None):
 
 @base.route('/login')
 def login():
-    "login redirects to Dex"
+    "login redirects to OIDC provider: " + get_oidc_provider()
 
     next_url = sanitize_url(unquote(request.args.get('next', '')))
     if next_url:
         session['next_url'] = next_url
 
-    return redirect(oidc.login('dex'))
+    return redirect(oidc.login(get_oidc_provider()))
 
 
 @base.route('/logout')
@@ -106,7 +134,7 @@ def logout():
 @base.route('/oidc_callback')
 @oidc.callback
 def oidc_callback():
-    user_info = oidc.authenticate('dex', request)
+    user_info = oidc.authenticate(get_oidc_provider(), request)
 
     session["iat"] = user_info["iat"]
 

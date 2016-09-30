@@ -48,6 +48,9 @@ class OIDC(object):
         self._callback_fn = fn
         return fn
 
+    def oidc_providers(self):
+        return list(self._config.keys())
+
     @property
     def callback_url(self):
         """
@@ -147,8 +150,9 @@ class OIDC(object):
         response = request.send(config['token_endpoint'])
 
         if 'error' in response:
-            raise Exception(response['error'] + ", " +
-                            response.get("error_description"))
+            raise Exception('{error}, {description}'.format(
+                error=response['error'],
+                description=response.get('error_description')))
 
         return response
 

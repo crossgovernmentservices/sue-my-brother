@@ -52,6 +52,18 @@
 
       {% block body_content %}{% endblock %}
 
+    <hr>
+    <div>
+      <form action="{{ url_for('base.switch_oidc_provider', caller=request.endpoint[4:]) }}" method="post">
+        OIDC provider: 
+        <select name="oidc_provider" onchange="this.form.submit()">
+          {% for key in oidc_providers %}
+          <option value="{{ key }}" {% if key==curr_oidc_provider() %}selected{% endif %}>{{ key.replace("_", " ").title() }}</option>
+          {% endfor %}
+        </select>
+        <a href="{{ url_for('base.reauthenticate', caller=request.path[1:]) }}">reauthenticate</a>
+      </form>
+    </div>
     </div>
   </main>
 {% endblock %}

@@ -5,7 +5,9 @@ from lib.oidc_old import verify_id_token
 from flask import session, url_for
 
 from app.blueprints.base.models import User
+from app.extensions import oidc
 
+from mock import patch
 
 test_token_response = {
     'id_token': (
@@ -91,3 +93,38 @@ class WhenUserIsAuthenticated(object):
         assert response.status_code == 302
 
         assert session['iat'] == expected_issue_timestamp
+
+
+def mock_requests_get(*args, **kwargs):
+    class MockResponse:
+
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        def json(self):
+            return self.json_data
+
+    if 'https://login.microsoftonline.com/testid' in args[0]:
+        return MockResponse({
+            'authorization_endpoint':
+            'https://login.microsoftonline.com/testid/oauth2/authorize',
+            'discovery_url':
+            'https://login.microsoftonline.com/testid'}, 200)
+    else:
+        return MockResponse({}, 404)
+
+
+class WhenUserAuthenticatesWithAzureADProvider(object):
+
+    @patch('lib.oidc_old.requests.get', mock_requests_get)
+    def it_retrieves_correct_authorization_endpoint(self, app):
+        app.config["OIDC_PROVIDERS"] = {
+            'dex': {'discovery_url': 'http://dex.example.com:5556'},
+            'azure_ad': {'discovery_url': 'https://login.microsoftonline.'
+                         'com/testid'}
+        }
+        oidc.init_app(app)
+        config = oidc.openid_config("azure_ad")
+        assert config['authorization_endpoint'] == (
+            'https://login.microsoftonline.com/testid/oauth2/authorize')
