@@ -3,9 +3,19 @@
 Test user flow
 """
 
+import pytest
 from bs4 import BeautifulSoup
 from flask import url_for
-import pytest
+from mock import Mock, patch
+
+
+mock_openid_config = Mock()
+mock_openid_config.return_value = {
+    'authorization_endpoint':
+    'http://dex.example.com:5556/auth',
+    'discovery_url':
+    'http://dex.example.com:5556',
+    'client_id': 'testid'}
 
 
 def request(url, method, data=None):
@@ -22,6 +32,11 @@ def index(client):
 @pytest.fixture
 def details_form(client):
     return request(url_for('base.details'), client.get)
+
+
+@pytest.fixture
+def admin_users(client):
+    return request(url_for('base.admin_users'), client.get)
 
 
 @pytest.fixture
@@ -87,3 +102,17 @@ class WhenEnteringSuitDetails(object):
         errors = post_suit({}).soup.find_all(class_='error')
         assert errors[0].parent.parent.find('label').text == \
             'Your Brother\'s Full Name'
+
+
+class WhenNavigatingToAdminUsers(object):
+
+    @patch('lib.oidc_old.OIDC.openid_config', mock_openid_config)
+    def it_redirects_to_identity_broker(self,
+                                        client,
+                                        test_admin_user,
+                                        admin_logged_in):
+
+        response = client.get(url_for('base.admin_users'))
+
+        assert "dex.example.com" in response.headers['Location']
+        assert response.status_code == 302

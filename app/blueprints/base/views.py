@@ -136,6 +136,9 @@ def oidc_callback():
 
     if 'next_url' in session:
         next_url = session['next_url']
+        if next_url == 'admin/users':
+            session["reauthenticated"] = True
+
         del session['next_url']
 
     return redirect(next_url)
@@ -360,6 +363,9 @@ def reject(suit):
 @login_required
 @roles_required('admin')
 def admin_users():
+    if not session.pop("reauthenticated", None):
+        return reauthenticate('admin/users')
+
     users = User.query.all()
     return render_template(
         'admin/users.html',
