@@ -137,7 +137,7 @@ class OIDC(object):
 
         except KeyNotFound:
             # refresh keys, in case they have been rotated
-            config = self.refresh_keys(provider_name)
+            config = self.refresh_keys(self.get_current_provider())
             claims = verify_id_token(token_response['id_token'], config)
 
         claims.update(self.userinfo(config, access_token))

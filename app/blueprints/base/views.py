@@ -74,10 +74,7 @@ def authenticated_within(max_age):
 
 
 def force_authentication(path=None):
-    request_path = url_for('base.index')
-    if path is not None:
-        request_path = path
-    session["next_url"] = request_path
+    session["next_url"] = path or url_for('base.index')
     return redirect(oidc.login(force_reauthentication=True))
 
 
@@ -298,15 +295,19 @@ def status(suit):
     suit = Suit.get_or_404(id=suit)
     return render_template('status.html', suit=suit)
 
+
 @base.app_template_filter("prettydate")
 def pretty_date(date):
-  return humanize.naturaltime(datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
+    return humanize.naturaltime(
+        datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
+
 
 @base.route('/admin')
 @login_required
 @roles_required('admin')
 def admin():
     return render_template('admin/index.html')
+
 
 @base.route('/admin/suits')
 @login_required
