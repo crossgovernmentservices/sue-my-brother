@@ -78,11 +78,7 @@ def force_authentication(path=None):
     if path is not None:
         request_path = path
     session["next_url"] = request_path
-    return redirect(oidc.login(get_idp(), force_reauthentication=True))
-
-
-def get_idp():
-    return oidc.get_current_provider()
+    return redirect(oidc.login(force_reauthentication=True))
 
 
 @base.route('/set_idp', methods=['GET', 'POST'])
@@ -108,7 +104,7 @@ def login():
     if next_url:
         session['next_url'] = next_url
 
-    return redirect(oidc.login(get_idp()))
+    return redirect(oidc.login())
 
 
 @base.route('/logout')
@@ -121,7 +117,7 @@ def logout():
 @base.route('/oidc_callback')
 @oidc.callback
 def oidc_callback():
-    user_info = oidc.authenticate(get_idp(), request)
+    user_info = oidc.authenticate()
 
     session["iat"] = user_info["iat"]
 

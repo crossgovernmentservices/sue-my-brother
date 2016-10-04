@@ -99,12 +99,12 @@ class OIDC(object):
 
         return self._config[provider_name]
 
-    def login(self, provider_name, force_reauthentication=False):
+    def login(self, force_reauthentication=False):
         """
         Generate a login URL for a provider
         """
 
-        config = self.openid_config(provider_name)
+        config = self.openid_config(self.get_current_provider())
 
         kw = {}
         if force_reauthentication:
@@ -120,12 +120,12 @@ class OIDC(object):
 
         return auth_request.url(config['authorization_endpoint'])
 
-    def authenticate(self, provider_name, request):
+    def authenticate(self):
         """
         Authenticate a user and retrieve their userinfo
         """
 
-        config = self.openid_config(provider_name)
+        config = self.openid_config(self.get_current_provider())
         auth_code = request.args['code']
 
         token_response = self.token_request(config, auth_code)
