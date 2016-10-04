@@ -5,7 +5,7 @@ OIDC client Flask extension
 
 from urllib.parse import urlencode
 
-from flask import url_for, current_app
+from flask import url_for, current_app, request
 from jose import jwt
 import requests
 
@@ -48,6 +48,18 @@ class OIDC(object):
         self._callback_fn = fn
         return fn
 
+    def providers(self):
+        return list(self._config.keys())
+
+    def get_current_provider(self):
+        return request.cookies.get('idp', self.providers()[0])
+
+    def set_current_provider(self, idp):
+        def set_idp_cookie(response):
+            response.set_cookie('idp', idp)
+            return response
+        return set_idp_cookie
+
     @property
     def callback_url(self):
         """
@@ -87,12 +99,12 @@ class OIDC(object):
 
         return self._config[provider_name]
 
-    def login(self, provider_name, force_reauthentication=False):
+    def login(self, force_reauthentication=False):
         """
         Generate a login URL for a provider
         """
 
-        config = self.openid_config(provider_name)
+        config = self.openid_config(self.get_current_provider())
 
         kw = {}
         if force_reauthentication:
@@ -108,12 +120,12 @@ class OIDC(object):
 
         return auth_request.url(config['authorization_endpoint'])
 
-    def authenticate(self, provider_name, request):
+    def authenticate(self):
         """
         Authenticate a user and retrieve their userinfo
         """
 
-        config = self.openid_config(provider_name)
+        config = self.openid_config(self.get_current_provider())
         auth_code = request.args['code']
 
         token_response = self.token_request(config, auth_code)
@@ -147,8 +159,9 @@ class OIDC(object):
         response = request.send(config['token_endpoint'])
 
         if 'error' in response:
-            raise Exception(response['error'] + ", " +
-                            response.get("error_description"))
+            raise Exception('{error}, {description}'.format(
+                error=response['error'],
+                description=response.get('error_description')))
 
         return response
 

@@ -48,6 +48,18 @@ OIDC_PROVIDERS = {
         'client_id': env.get('OIDC_CLIENT_ID'),
         'client_secret': env.get('OIDC_CLIENT_SECRET'),
         'redirect_uri': None
+    },
+    'azure_ad': {
+        'discovery_url': env.get('OIDC_ISSUER_1'),
+        'client_id': env.get('OIDC_CLIENT_ID_1'),
+        'client_secret': env.get('OIDC_CLIENT_SECRET_1'),
+        'redirect_uri': None
+    },
+    'google': {
+        'discovery_url': env.get('OIDC_ISSUER_2'),
+        'client_id': env.get('OIDC_CLIENT_ID_2'),
+        'client_secret': env.get('OIDC_CLIENT_SECRET_2'),
+        'redirect_uri': None
     }
 }
 

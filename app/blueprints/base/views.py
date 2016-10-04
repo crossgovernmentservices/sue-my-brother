@@ -7,6 +7,7 @@ import humanize
 from flask import (
     Blueprint,
     abort,
+    after_this_request,
     current_app,
     flash,
     redirect,
@@ -73,27 +74,37 @@ def authenticated_within(max_age):
 
 
 def force_authentication(path=None):
-    request_path = request.full_path
+    request_path = url_for('base.index')
     if path is not None:
         request_path = path
     session["next_url"] = request_path
-    return redirect(oidc.login("dex", force_reauthentication=True))
+    return redirect(oidc.login(force_reauthentication=True))
 
 
-@base.route('/reauthenticate/<path:caller>')
-def reauthenticate(caller=None):
-    return force_authentication(caller)
+@base.route('/set_idp', methods=['GET', 'POST'])
+def set_idp():
+    idp = request.form["idp"]
+    caller = request.args.get('caller', url_for('base.index'))
+
+    after_this_request(oidc.set_current_provider(idp))
+
+    return redirect(caller)
+
+
+@base.route('/reauthenticate/')
+def reauthenticate():
+    return force_authentication(request.args.get('caller', None))
 
 
 @base.route('/login')
 def login():
-    "login redirects to Dex"
+    "login redirects to currently selected OIDC provider"
 
     next_url = sanitize_url(unquote(request.args.get('next', '')))
     if next_url:
         session['next_url'] = next_url
 
-    return redirect(oidc.login('dex'))
+    return redirect(oidc.login())
 
 
 @base.route('/logout')
@@ -106,7 +117,7 @@ def logout():
 @base.route('/oidc_callback')
 @oidc.callback
 def oidc_callback():
-    user_info = oidc.authenticate('dex', request)
+    user_info = oidc.authenticate()
 
     session["iat"] = user_info["iat"]
 
