@@ -108,9 +108,9 @@ def mock_requests_get(*args, **kwargs):
     if 'https://login.microsoftonline.com/testid' in args[0]:
         return MockResponse({
             'authorization_endpoint':
-            'https://login.microsoftonline.com/testid/oauth2/authorize',
+                'https://login.microsoftonline.com/testid/oauth2/authorize',
             'discovery_url':
-            'https://login.microsoftonline.com/testid'}, 200)
+                'https://login.microsoftonline.com/testid'}, 200)
     else:
         return MockResponse({}, 404)
 

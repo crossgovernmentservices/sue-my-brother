@@ -4,8 +4,7 @@ from flask import url_for
 
 
 def request(url, method, data=None):
-    r = method(url, data=data)
-    return r
+    return method(url, data=data)
 
 
 @pytest.fixture
@@ -22,16 +21,16 @@ def post(client):
 
 
 @pytest.fixture
-def post_switch_oidc_provider(post):
-    return post(url_for('base.switch_oidc_provider', caller='.admin'))
+def post_set_idp(post):
+    url = url_for('base.set_idp', caller='.admin')
+    return post(url)
 
 
 class WhenUserChangesOIDCProvider(object):
 
-    def it_stores_new_oidc_provider_in_cookie(self,
-                                              post_switch_oidc_provider):
-        data = {'oidc_provider': 'test'}
-        response = post_switch_oidc_provider(data)
+    def it_sets_idp(self, post_set_idp):
+        data = {'idp': 'test'}
+        response = post_set_idp(data)
 
         cookies = response.headers.getlist('Set-Cookie')
-        assert any("oidc_provider=test;" in s for s in cookies)
+        assert any("idp=test;" in s for s in cookies)

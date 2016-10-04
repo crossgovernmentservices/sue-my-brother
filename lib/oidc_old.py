@@ -5,7 +5,7 @@ OIDC client Flask extension
 
 from urllib.parse import urlencode
 
-from flask import url_for, current_app
+from flask import url_for, current_app, request
 from jose import jwt
 import requests
 
@@ -48,8 +48,17 @@ class OIDC(object):
         self._callback_fn = fn
         return fn
 
-    def oidc_providers(self):
+    def providers(self):
         return list(self._config.keys())
+
+    def get_current_provider(self):
+        return request.cookies.get('idp', self.providers()[0])
+
+    def set_current_provider(self, idp):
+        def set_idp_cookie(response):
+            response.set_cookie('idp', idp)
+            return response
+        return set_idp_cookie
 
     @property
     def callback_url(self):

@@ -6,7 +6,6 @@ Sue My Brother app factory class
 import os
 
 from flask import Flask, render_template, session
-from app.blueprints.base.views import get_oidc_provider
 from app.extensions import oidc
 
 
@@ -67,10 +66,11 @@ def register_context_processors(app):
     """
 
     def base_context_processor():
-        return {'asset_path': '/static/govuk_template/assets/',
-                'auth_time': session.get('iat'),
-                'curr_oidc_provider': get_oidc_provider,
-                'oidc_providers': oidc.oidc_providers()}
+        return {
+            'asset_path': '/static/govuk_template/assets/',
+            'auth_time': session.get('iat'),
+            'idp': oidc.get_current_provider,
+            'oidc_providers': oidc.providers()}
 
     app.context_processor(base_context_processor)
 
