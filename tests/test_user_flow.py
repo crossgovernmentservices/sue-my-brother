@@ -11,10 +11,8 @@ from mock import Mock, patch
 
 mock_openid_config = Mock()
 mock_openid_config.return_value = {
-    'authorization_endpoint':
-    'http://dex.example.com:5556/auth',
-    'discovery_url':
-    'http://dex.example.com:5556',
+    'authorization_endpoint': 'http://dex.example.com:5556/auth',
+    'discovery_url': 'http://dex.example.com:5556',
     'client_id': 'testid'}
 
 
@@ -107,10 +105,8 @@ class WhenEnteringSuitDetails(object):
 class WhenNavigatingToAdminUsers(object):
 
     @patch('lib.oidc_old.OIDC.openid_config', mock_openid_config)
-    def it_redirects_to_identity_broker(self,
-                                        client,
-                                        test_admin_user,
-                                        admin_logged_in):
+    def it_redirects_to_identity_broker(
+            self, client, test_admin_user, admin_logged_in):
 
         response = client.get(url_for('base.admin_users'))
 
