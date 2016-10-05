@@ -99,7 +99,7 @@ class OIDC(object):
 
         return self._config[provider_name]
 
-    def login(self, force_reauthentication=False):
+    def login(self, force_reauthentication=False, state=None):
         """
         Generate a login URL for a provider
         """
@@ -110,6 +110,7 @@ class OIDC(object):
         if force_reauthentication:
             kw["prompt"] = "login"
             kw["max_age"] = current_app.config.get("ACCEPT_SUIT_MAX_AGE")
+            kw["state"] = state
 
         auth_request = AuthenticationRequest(
             scope='openid email profile',
@@ -137,7 +138,7 @@ class OIDC(object):
 
         except KeyNotFound:
             # refresh keys, in case they have been rotated
-            config = self.refresh_keys(provider_name)
+            config = self.refresh_keys(self.get_current_provider())
             claims = verify_id_token(token_response['id_token'], config)
 
         claims.update(self.userinfo(config, access_token))

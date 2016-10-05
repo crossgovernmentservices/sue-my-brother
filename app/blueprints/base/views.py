@@ -1,3 +1,5 @@
+import binascii
+import os
 import datetime
 import time
 from urllib.parse import unquote, urlparse, urlunparse
@@ -66,6 +68,16 @@ def sanitize_url(url):
     return url
 
 
+@base.route('/set_idp', methods=['GET', 'POST'])
+def set_idp():
+    idp = request.form["idp"]
+
+    after_this_request(oidc.set_current_provider(idp))
+
+    caller = request.args.get('caller', url_for('base.index'))
+    return redirect(caller)
+
+
 def authenticated_within(max_age):
     auth_time = session["iat"]
     time_elapsed_since_authenticated = int(time.time()) - auth_time
@@ -74,26 +86,16 @@ def authenticated_within(max_age):
 
 
 def force_authentication(path=None):
-    request_path = url_for('base.index')
-    if path is not None:
-        request_path = path
-    session["next_url"] = request_path
-    return redirect(oidc.login(force_reauthentication=True))
+    state = binascii.hexlify(os.urandom(7)).decode("utf-8")
+    session["auth_state"] = state
 
-
-@base.route('/set_idp', methods=['GET', 'POST'])
-def set_idp():
-    idp = request.form["idp"]
-    caller = request.args.get('caller', url_for('base.index'))
-
-    after_this_request(oidc.set_current_provider(idp))
-
-    return redirect(caller)
+    session["next_url"] = path or url_for('base.index')
+    return redirect(oidc.login(force_reauthentication=True, state=state))
 
 
 @base.route('/reauthenticate/')
-def reauthenticate():
-    return force_authentication(request.args.get('caller', None))
+def reauthenticate(caller=None):
+    return force_authentication(request.args.get('caller', caller))
 
 
 @base.route('/login')
@@ -120,6 +122,7 @@ def oidc_callback():
     user_info = oidc.authenticate()
 
     session["iat"] = user_info["iat"]
+    session["callback_state"] = request.args.get("state", None)
 
     user = user_datastore.get_user(user_info.get(
         'email', user_info.get('upn')))
@@ -139,6 +142,7 @@ def oidc_callback():
 
     if 'next_url' in session:
         next_url = session['next_url']
+
         del session['next_url']
 
     return redirect(next_url)
@@ -298,15 +302,19 @@ def status(suit):
     suit = Suit.get_or_404(id=suit)
     return render_template('status.html', suit=suit)
 
+
 @base.app_template_filter("prettydate")
 def pretty_date(date):
-  return humanize.naturaltime(datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
+    return humanize.naturaltime(
+        datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
+
 
 @base.route('/admin')
 @login_required
 @roles_required('admin')
 def admin():
     return render_template('admin/index.html')
+
 
 @base.route('/admin/suits')
 @login_required
@@ -359,6 +367,11 @@ def reject(suit):
 @login_required
 @roles_required('admin')
 def admin_users():
+    auth_state = session.pop("auth_state", None)
+    callback_state = session.pop('callback_state', None)
+    if auth_state is None or auth_state != callback_state:
+        return reauthenticate(url_for('base.admin_users'))
+
     users = User.query.all()
     return render_template(
         'admin/users.html',
