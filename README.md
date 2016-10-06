@@ -168,11 +168,13 @@ cd csd-identity-products/products/dex/docker-compose
 docker-compose up
 ```
 
-In another window 
+This will wait for connectors. Once it's doing so run this in another terminal:
 
 ```
 docker exec -it dockercompose_overlord_1 /opt/dex/bin/dexctl --db-url postgres://user:password@postgres:5432/user?sslmode=disable set-connector-configs /opt/dex/connectors/connectors.json
 ```
+
+This should result in IdP connectors being loaded.
 
 Generate keys
 
