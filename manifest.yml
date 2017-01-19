@@ -1,4 +1,5 @@
 ---
 applications:
 - name: sue-my-brother
-  memory: 512M
+  memory: 128M
+  buildpack: python_buildpack
