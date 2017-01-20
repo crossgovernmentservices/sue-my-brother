@@ -14,22 +14,16 @@ It is possible to install libraries using other means but in this set up for sue
 
 ## Pre-requisites for sue-my-brother
 
-### Python, pip and virtualenvwrapper
+### Python and pip
 
 ```
 	brew install python3
 	sudo easy_install pip
-	sudo easy_install virtualenvwrapper
 
-	mkvirtualenv smb --python=`which python3`
+	python3 -m venv venv
+	. venv/bin/activate
 
 	pip install -r requirements.txt
-```
-
-### Append to bash_profile
-
-```
-source /usr/local/bin/virtualenvwrapper.sh
 ```
 
 ## Pre-requisites for running sue-my-brother with a local [Dex](https://github.com/coreos/dex) instance
