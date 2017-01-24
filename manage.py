@@ -10,14 +10,11 @@ import pytest
 
 from app.extensions import user_datastore
 from app.factory import create_app
-from lib.govuk_assets import ManageGovUkAssets
-from lib.travis_ci import travis_fold
 
 
 manager = Manager(create_app)
 manager.add_command('assets', ManageAssets())
 manager.add_command('db', MigrateCommand)
-manager.add_command('install_all_govuk_assets', ManageGovUkAssets())
 
 
 suites = {
@@ -116,13 +113,6 @@ def runserver_ssl():
         port=5443,
         ssl_context=('server.crt', 'server.key'))
 
-
-@manager.command
-def build_and_test():
-    with travis_fold('install_all_govuk_assets'):
-        manager.handle('', ['install_all_govuk_assets', '--clean'])
-
-    return test(spec=True, watch=False, suite='all')
 
 if __name__ == '__main__':
     manager.run()
