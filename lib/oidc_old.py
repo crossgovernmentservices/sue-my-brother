@@ -113,7 +113,7 @@ class OIDC(object):
             kw["state"] = state
 
         auth_request = AuthenticationRequest(
-            scope='openid email profile',
+            scope='openid profile',
             response_type='code',
             client_id=config['client_id'],
             redirect_uri=config.get('redirect_uri') or self.callback_url,

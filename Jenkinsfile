@@ -1,12 +1,13 @@
 #!groovy
 
+import groovy.json.JsonSlurper
+
+
 node {
 
     properties([
         parameters([
             string(name: 'OIDC_CLIENT_ISSUER', defaultValue: 'https://ags-gateway.cloudapps.digital'),
-            string(name: 'OIDC_CLIENT_ID', defaultValue: 'test-client'),
-            string(name: 'OIDC_CLIENT_SECRET', defaultValue: 'test-secret')
         ])
     ])
 
@@ -51,8 +52,15 @@ node {
             appName = "${appName}-${BRANCH_NAME.replace('_', '-')}"
         }
 
-        retry(2) {
-            deployToPaaS(appName)
+        config = registerOIDCClient(appName)
+
+        withEnv([
+            "OIDC_CLIENT_ID=${config['client_id']}",
+            "OIDC_CLIENT_SECRET=${config['client_secret']}"]) {
+
+            retry(2) {
+                deployToPaaS(appName)
+            }
         }
     }
 }
@@ -75,4 +83,19 @@ def deployToPaaS(appName) {
             }
         }
     }
+}
+
+
+@NonCPS
+def parseJson(def json) {
+    def config = new groovy.json.JsonSlurper().parseText(json)
+    [client_id: config['client_id'], client_secret: config['client_secret']]
+}
+
+
+def registerOIDCClient(appName) {
+    def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
+    def json = "{\"redirect_uris\": [\"http://${appName}.cloudapps.digital/oidc_callback\"]}"
+    def response = httpRequest(contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: json, url: url)
+    parseJson(response.content)
 }
