@@ -3,10 +3,10 @@
 Sue My Brother app factory class
 """
 
+import logging.config
 import os
 
-from flask import Flask, render_template, session
-from app.extensions import oidc
+from flask import Flask, render_template
 
 
 def create_app(config='config.py', **kwargs):
@@ -18,12 +18,42 @@ def create_app(config='config.py', **kwargs):
     app.config.from_pyfile(config)
     app.config.update(kwargs)
 
+    configure_logger(app)
+
     register_blueprints(app)
     register_context_processors(app)
     register_error_handlers(app)
     register_extensions(app)
 
     return app
+
+
+def configure_logger(app):
+    app.logger
+    logging.config.dictConfig(app.config.get('LOGGING', {}))
+
+
+def register_blueprints(app):
+    """
+    Import and register blueprints
+    """
+
+    # XXX must come first as defines User and Role model classes
+    from app.main import main
+    app.register_blueprint(main)
+
+
+def register_context_processors(app):
+    """
+    Add template context variables and functions
+    """
+
+    def base_context_processor():
+        return {
+            'asset_path': '/static/govuk_template/assets/',
+        }
+
+    app.context_processor(base_context_processor)
 
 
 def register_error_handlers(app):
@@ -48,31 +78,6 @@ def register_error_handlers(app):
     for template, codes in error_handlers.items():
         for code in codes:
             app.register_error_handler(code, make_handler(code, template))
-
-
-def register_blueprints(app):
-    """
-    Import and register blueprints
-    """
-
-    # XXX must come first as defines User and Role model classes
-    from app.blueprints.base.views import base
-    app.register_blueprint(base)
-
-
-def register_context_processors(app):
-    """
-    Add template context variables and functions
-    """
-
-    def base_context_processor():
-        return {
-            'asset_path': '/static/govuk_template/assets/',
-            'auth_time': session.get('iat'),
-            'idp': oidc.get_current_provider,
-            'oidc_providers': oidc.providers()}
-
-    app.context_processor(base_context_processor)
 
 
 def register_extensions(app):
@@ -109,7 +114,7 @@ def register_extensions(app):
 
     from flask_security import Security
     from app.extensions import user_datastore
-    from app.blueprints.base.models import AnonymousUser, Role, User
+    from app.main.models import AnonymousUser, Role, User
     user_datastore.role_model = Role
     user_datastore.user_model = User
     Security(app, user_datastore, anonymous_user=AnonymousUser)
@@ -117,8 +122,8 @@ def register_extensions(app):
     from app.extensions import notify
     notify.init_app(app)
 
-    from app.extensions import oidc
-    oidc.init_app(app)
+    from app.oidc_client import OIDCClient
+    OIDCClient(app)
 
     from app.extensions import pay
     pay.init_app(app)

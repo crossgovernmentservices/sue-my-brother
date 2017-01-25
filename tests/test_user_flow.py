@@ -6,7 +6,7 @@ Test user flow
 import pytest
 from bs4 import BeautifulSoup
 from flask import url_for
-from mock import Mock, patch
+from mock import Mock
 
 
 mock_openid_config = Mock()
@@ -24,17 +24,17 @@ def request(url, method, data=None):
 
 @pytest.fixture
 def index(client):
-    return request(url_for('base.index'), client.get)
+    return request(url_for('main.index'), client.get)
 
 
 @pytest.fixture
 def details_form(client):
-    return request(url_for('base.details'), client.get)
+    return request(url_for('main.details'), client.get)
 
 
 @pytest.fixture
 def admin_users(client):
-    return request(url_for('base.admin_users'), client.get)
+    return request(url_for('main.admin_users'), client.get)
 
 
 @pytest.fixture
@@ -52,19 +52,19 @@ def post(client):
 
 @pytest.fixture
 def post_details(post):
-    return post(url_for('base.details'))
+    return post(url_for('main.details'))
 
 
 @pytest.fixture
 def post_suit(post):
-    return post(url_for('base.start_suit'))
+    return post(url_for('main.start_suit'))
 
 
 @pytest.mark.usefixtures('db_session')
 class WhenGettingStarted(object):
 
     def it_shows_a_call_to_action(self, index):
-        links = index.soup.find_all('a', href=url_for('base.details'))
+        links = index.soup.find_all('a', href=url_for('main.details'))
         assert 'Sue him now' in links[0].text
 
     def it_requests_user_details_if_unrecognized(self, details_form):
@@ -104,11 +104,10 @@ class WhenEnteringSuitDetails(object):
 
 class WhenNavigatingToAdminUsers(object):
 
-    @patch('lib.oidc_old.OIDC.openid_config', mock_openid_config)
     def it_redirects_to_identity_broker(
             self, client, test_admin_user, admin_logged_in):
 
-        response = client.get(url_for('base.admin_users'))
+        response = client.get(url_for('main.admin_users'))
 
-        assert "dex.example.com" in response.headers['Location']
+        assert "example.com" in response.headers['Location']
         assert response.status_code == 302

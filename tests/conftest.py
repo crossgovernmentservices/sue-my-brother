@@ -6,20 +6,54 @@ import subprocess
 
 from flask_migrate import upgrade
 import pytest
+from responses import RequestsMock
 import sqlalchemy
 
-from app.blueprints.base.models import User
+from app.main.models import User
 from app.config import SQLALCHEMY_DATABASE_URI
 from app.extensions import db as _db, user_datastore
 from app.factory import create_app
+from tests.oidc_testbed import MockOIDCProvider
 
 
 TEST_DATABASE_URI = SQLALCHEMY_DATABASE_URI + '_test'
 
+config = {
+    'issuer': 'http://example.com',
+}
+
 
 @pytest.yield_fixture(scope='session')
-def app(request):
-    app = create_app(TESTING=True, SQLALCHEMY_DATABASE_URI=TEST_DATABASE_URI)
+def responses():
+    with RequestsMock(assert_all_requests_are_fired=False) as patch:
+        yield patch
+
+
+@pytest.yield_fixture(scope='session')
+def provider(responses):
+    op = MockOIDCProvider(responses, config)
+    op.init_endpoints()
+    yield op
+    op.remove_endpoints()
+
+
+@pytest.yield_fixture(scope='session')
+def app(provider):
+    app = create_app(**{
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URI,
+        'PREFERRED_URL_SCHEME': 'http',
+        'WTF_CSRF_ENABLED': False,
+        'OIDC_CLIENT': {
+            'issuer': config['issuer'],
+            'client_id': 'test-client',
+            'client_secret': 'test-secret'
+        },
+        'OIDC_PROVIDER': {
+            'issuer': 'https://localhost:5000',
+            'subject_id_hash_salt': 'salt'
+        }
+    })
 
     ctx = app.app_context()
     ctx.push()

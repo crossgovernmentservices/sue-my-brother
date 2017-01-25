@@ -43,6 +43,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+pytest.ini
 
 # Translations
 *.mo
@@ -88,3 +89,23 @@ ENV/
 .ropeproject
 *.env
 *.db
+
+# Version control
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Jenkins
+Jenkinsfile
+
+# non-CF deployment
+deploy/
+deploy-to-paas
+install-govuk-assets
+
+# dev keys
+server.crt
+server.key

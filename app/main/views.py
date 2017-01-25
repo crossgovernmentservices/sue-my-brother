@@ -1,15 +1,11 @@
-import binascii
-import os
 import datetime
 import time
-from urllib.parse import unquote, urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse
 import uuid
 import humanize
 
 from flask import (
-    Blueprint,
     abort,
-    after_this_request,
     current_app,
     flash,
     redirect,
@@ -30,12 +26,10 @@ from .models import Suit, User
 from .permissions import (
     accept_suit_permission,
     make_admin_permission,
-    setup_permissions)
-from app.extensions import db, notify, oidc, pay, user_datastore
-
-
-base = Blueprint('base', __name__)
-base.record(setup_permissions)
+)
+from app.extensions import db, notify, pay, user_datastore
+from app.main import main
+from app import oidc_client
 
 
 def get_current_user():
@@ -68,16 +62,6 @@ def sanitize_url(url):
     return url
 
 
-@base.route('/set_idp', methods=['GET', 'POST'])
-def set_idp():
-    idp = request.form["idp"]
-
-    after_this_request(oidc.set_current_provider(idp))
-
-    caller = request.args.get('caller', url_for('base.index'))
-    return redirect(caller)
-
-
 def authenticated_within(max_age):
     auth_time = session["iat"]
     time_elapsed_since_authenticated = int(time.time()) - auth_time
@@ -85,67 +69,46 @@ def authenticated_within(max_age):
     return time_elapsed_since_authenticated <= max_age
 
 
+@oidc_client.authenticate
 def force_authentication(path=None):
-    state = binascii.hexlify(os.urandom(7)).decode("utf-8")
-    session["auth_state"] = state
-
-    session["next_url"] = path or url_for('base.index')
-    return redirect(oidc.login(force_reauthentication=True, state=state))
+    return redirect(path or url_for('.index'))
 
 
-@base.route('/reauthenticate/')
+@main.route('/reauthenticate/')
 def reauthenticate(caller=None):
+
+    if 'id_token' in session:
+        del session['id_token']
+
     return force_authentication(request.args.get('caller', caller))
 
 
-@base.route('/login')
+@main.route('/login')
+@oidc_client.authenticate
 def login():
-    "login redirects to currently selected OIDC provider"
 
-    next_url = sanitize_url(unquote(request.args.get('next', '')))
-    if next_url:
-        session['next_url'] = next_url
-
-    return redirect(oidc.login())
-
-
-@base.route('/logout')
-def logout():
-    logout_user()
-    set_current_user(current_user)
-    return redirect(url_for('.index'))
-
-
-@base.route('/oidc_callback')
-@oidc.callback
-def oidc_callback():
-    user_info = oidc.authenticate()
-
-    session["iat"] = user_info["iat"]
-    session["callback_state"] = request.args.get("state", None)
-
-    user = user_datastore.get_user(user_info.get(
-        'email', user_info.get('upn')))
+    user = user_datastore.get_user(session.get('userinfo', {}).get(
+        'email', session['id_token'].get('sub')))
 
     if not user:
-        user = create_user(user_info)
+        user = create_user(session.get('userinfo'))
 
     user_name = getattr(user, 'name')
     if user_name is None:
-        user_name = user_info.get('name')
+        user_name = session.get('userinfo', {}).get('name')
         user.name = user_name
         db.session.commit()
 
     login_user(user)
 
-    next_url = url_for('.details')
+    return redirect(url_for('.details'))
 
-    if 'next_url' in session:
-        next_url = session['next_url']
 
-        del session['next_url']
-
-    return redirect(next_url)
+@main.route('/logout')
+def logout():
+    logout_user()
+    set_current_user(current_user)
+    return redirect(url_for('.index'))
 
 
 def create_user(user_info):
@@ -173,7 +136,7 @@ def current_suit(user):
     ).order_by(desc(Suit.created)).first()
 
 
-@base.route('/')
+@main.route('/')
 def index():
     suit = current_suit(get_current_user())
     if suit:
@@ -182,8 +145,8 @@ def index():
     return render_template('index.html')
 
 
-@base.route('/details', methods=['GET', 'POST'])
-@base.route('/details/<action>', methods=['GET', 'POST'])
+@main.route('/details', methods=['GET', 'POST'])
+@main.route('/details/<action>', methods=['GET', 'POST'])
 def details(action='set'):
 
     form = DetailsForm()
@@ -214,7 +177,7 @@ def details(action='set'):
     return render_template('details.html', form=form)
 
 
-@base.route('/start')
+@main.route('/start')
 def start():
 
     suit = current_suit(get_current_user())
@@ -224,7 +187,7 @@ def start():
     return redirect(url_for('.start_suit'))
 
 
-@base.route('/start-suit', methods=['GET', 'POST'])
+@main.route('/start-suit', methods=['GET', 'POST'])
 def start_suit():
 
     form = SuitForm()
@@ -248,7 +211,7 @@ def start_suit():
     return render_template('suit.html', form=form)
 
 
-@base.route('/pay', methods=['GET', 'POST'])
+@main.route('/pay', methods=['GET', 'POST'])
 def make_payment():
     suit = current_suit(get_current_user())
 
@@ -276,7 +239,7 @@ def make_payment():
     return render_template('pay.html')
 
 
-@base.route('/confirm/<uid>')
+@main.route('/confirm/<uid>')
 def confirm(uid):
     suit = current_suit(get_current_user())
 
@@ -297,26 +260,26 @@ def confirm(uid):
     return redirect(url_for('.status', suit=suit.id))
 
 
-@base.route('/status/<suit>')
+@main.route('/status/<suit>')
 def status(suit):
     suit = Suit.get_or_404(id=suit)
     return render_template('status.html', suit=suit)
 
 
-@base.app_template_filter("prettydate")
+@main.app_template_filter("prettydate")
 def pretty_date(date):
     return humanize.naturaltime(
         datetime.datetime.now() - datetime.datetime.fromtimestamp(date))
 
 
-@base.route('/admin')
+@main.route('/admin')
 @login_required
 @roles_required('admin')
 def admin():
     return render_template('admin/index.html')
 
 
-@base.route('/admin/suits')
+@main.route('/admin/suits')
 @login_required
 @roles_required('admin')
 def admin_suits():
@@ -327,7 +290,7 @@ def admin_suits():
         can_accept_suit=accept_suit_permission.can())
 
 
-@base.route('/admin/suits/<suit>/accept', methods=['GET', 'POST'])
+@main.route('/admin/suits/<suit>/accept', methods=['GET', 'POST'])
 @login_required
 @roles_required('admin')
 @accept_suit_permission.require()
@@ -351,7 +314,7 @@ def accept(suit):
     return redirect(url_for('.admin'))
 
 
-@base.route('/admin/suits/<suit>/reject', methods=['POST'])
+@main.route('/admin/suits/<suit>/reject', methods=['POST'])
 @login_required
 @roles_required('admin')
 @accept_suit_permission.require()
@@ -363,14 +326,14 @@ def reject(suit):
     return redirect(url_for('.admin'))
 
 
-@base.route('/admin/users')
+@main.route('/admin/users')
 @login_required
 @roles_required('admin')
 def admin_users():
     auth_state = session.pop("auth_state", None)
     callback_state = session.pop('callback_state', None)
     if auth_state is None or auth_state != callback_state:
-        return reauthenticate(url_for('base.admin_users'))
+        return reauthenticate(url_for('.admin_users'))
 
     users = User.query.all()
     return render_template(
@@ -379,7 +342,7 @@ def admin_users():
         can_make_admin=make_admin_permission.can())
 
 
-@base.route('/admin/users/<user>', methods=['POST'])
+@main.route('/admin/users/<user>', methods=['POST'])
 @login_required
 @roles_required('admin')
 def update_user(user):
@@ -418,7 +381,7 @@ def update_user(user):
     return redirect(url_for('.admin_users'))
 
 
-@base.route('/admin/users/<user>/delete', methods=['POST'])
+@main.route('/admin/users/<user>/delete', methods=['POST'])
 @login_required
 @roles_required('admin')
 def delete_user(user):

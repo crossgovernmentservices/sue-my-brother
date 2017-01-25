@@ -1,4 +1,0 @@
--r common.txt
-
-waitress==0.8.9  # WSGI server
-whitenoise==1.0.6  # manages static assets

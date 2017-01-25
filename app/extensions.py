@@ -10,7 +10,6 @@ from sqlalchemy.engine import Engine
 from sqlite3 import Connection as SQLite3Connection
 
 from lib.notify import Notify
-from lib.oidc_old import OIDC
 from lib.pay import Pay
 
 
@@ -34,7 +33,5 @@ db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 notify = Notify()
 
 user_datastore = SQLAlchemyUserDatastore(db, None, None)
-
-oidc = OIDC()
 
 pay = Pay()

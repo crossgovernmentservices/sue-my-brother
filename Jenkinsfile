@@ -23,7 +23,7 @@ node {
                 sh "rm -rf venv"
                 sh "python3 -m venv venv"
                 sh "venv/bin/pip install -U pip"
-                sh "venv/bin/pip install -r requirements/jenkins.txt"
+                sh "venv/bin/pip install -r requirements.txt"
             },
 
             "Build GOV.UK assets": {
@@ -95,7 +95,10 @@ def parseJson(def json) {
 
 def registerOIDCClient(appName) {
     def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
-    def json = "{\"redirect_uris\": [\"http://${appName}.cloudapps.digital/oidc_callback\"]}"
+    def json = "{\"redirect_uris\": [\"https://${appName}.cloudapps.digital/oidc_callback\"]}"
+    echo "POSTing ${json}"
     def response = httpRequest(contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: json, url: url)
-    parseJson(response.content)
+    config = parseJson(response.content)
+    echo "Received client ID: ${config['client_id']}"
+    return config
 }
