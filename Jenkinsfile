@@ -113,9 +113,8 @@ def registerOIDCClient(appName) {
     def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
     def json = "{\"redirect_uris\": [\"https://${appName}.cloudapps.digital/oidc_callback\"]}"
 
-    def delay = 4
     def response = null
-    timeout(time: 240, unit: 'SECONDS') {
+    timeout(5) {
         waitUntil {
             try {
                 response = httpRequest(
@@ -126,7 +125,7 @@ def registerOIDCClient(appName) {
                 )
                 return true
             } catch (err) {
-                sleep(time: delay, unit: 'SECONDS')
+                sleep(time: 30, unit: 'SECONDS')
             }
             return false
         }
