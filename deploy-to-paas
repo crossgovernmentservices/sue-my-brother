@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+export CF_HOME="$(mktemp -d)"
+rm -r "$CF_HOME" || true
+
+cf api https://api.cloud.service.gov.uk
+
+cf auth "$CF_USER" "$CF_PASSWORD"
+
+cf target -o csd-sso -s sandbox
+
+cat << EOF >> manifest.yml
+  env:
+      OIDC_CLIENT_ID: $OIDC_CLIENT_ID
+      OIDC_CLIENT_SECRET: $OIDC_CLIENT_SECRET
+      OIDC_CLIENT_ISSUER: $OIDC_CLIENT_ISSUER
+      SERVER_NAME: ${CF_APPNAME}.cloudapps.digital
+EOF
+
+cf push $CF_APPNAME
+
+head -n 5 manifest.yml > temp.yml ; mv temp.yml manifest.yml
+
+cf logout

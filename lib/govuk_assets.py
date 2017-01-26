@@ -9,10 +9,125 @@ import os
 import shutil
 import subprocess
 from tempfile import TemporaryDirectory
-import urllib
+from urllib.request import urlretrieve
 import zipfile
 
-from flask_script import Command, Option
+
+def install_govuk_assets(app_dir, logger=None):
+    for package in ('frontend_toolkit', 'elements', 'template'):
+        install(package, app_dir, logger)
+
+
+def install(package, app_dir, logger=None):
+    meta = package_metadata[package]
+
+    def log(msg):
+        return logger(msg) if logger else None
+
+    if is_installed(meta, app_dir):
+        return None
+
+    log('Installing {}'.format(package))
+
+    remove_package(meta, app_dir)
+
+    with download_and_unzip(meta['url']) as unzip_dir:
+        meta['install'](unzip_dir, app_dir, meta['dirs'])
+
+    log('Done')
+
+
+def is_installed(package, app_dir):
+    return all([
+        os.path.isdir(path.format(app_dir))
+        for path in package['dirs'].values()])
+
+
+def remove_govuk_assets(app_dir):
+    for package in ('frontend_toolkit', 'elements', 'template'):
+        remove_package(package_metadata[package], app_dir)
+
+
+def remove_package(package, app_dir):
+    for path in package['dirs'].values():
+        rmdir(path.format(app_dir))
+
+
+def install_frontend_toolkit(unzip_dir, app_dir, dirs):
+    for path in ('images', 'javascripts', 'stylesheets'):
+        move_dir(
+            '{}/govuk_frontend_toolkit-master/{}'.format(unzip_dir, path),
+            to=dirs['dest_dir'].format(app_dir))
+
+
+def install_elements(unzip_dir, app_dir, dirs):
+    move_dir(
+        '{}/govuk_elements-master/public'.format(unzip_dir),
+        to=dirs['dest_dir'].format(app_dir))
+
+
+def install_template(unzip_dir, app_dir, dirs):
+    master_dir = '{}/govuk_template-master'.format(unzip_dir)
+
+    with pushd(master_dir):
+        compile_template()
+
+    move_dir(
+        '{}/pkg/jinja_govuk_template*/assets'.format(master_dir),
+        to=dirs['dest_assets'].format(app_dir))
+
+    move_dir(
+        '{}/pkg/jinja_govuk_template*/views'.format(master_dir),
+        to=dirs['dest_views'].format(app_dir))
+
+
+def compile_template():
+    os.remove('.ruby-version')
+    subprocess.call(['bundle', 'install'])
+    subprocess.call(['bundle', 'exec', 'rake', 'build:jinja'])
+
+
+package_metadata = {
+    'frontend_toolkit': {
+        'url': (
+            'https://github.com/alphagov/govuk_frontend_toolkit/archive/'
+            'master.zip'
+        ),
+        'dirs': {
+            'dest_dir': '{}/static/govuk_frontend_toolkit'
+        },
+        'install': install_frontend_toolkit
+    },
+    'elements': {
+        'url': 'https://github.com/alphagov/govuk_elements/archive/master.zip',
+        'dirs': {
+            'dest_dir': '{}/static/govuk_elements'
+        },
+        'install': install_elements
+    },
+    'template': {
+        'url': 'https://github.com/alphagov/govuk_template/archive/master.zip',
+        'dirs': {
+            'dest_views': '{}/templates/govuk_template',
+            'dest_assets': '{}/static/govuk_template'
+        },
+        'install': install_template
+    }
+}
+
+
+@contextlib.contextmanager
+def download_and_unzip(url):
+    with TemporaryDirectory() as download_dir:
+        dest_zip = '{}/package.zip'.format(download_dir)
+        unzip_dir = '{}/unzipped'.format(download_dir)
+
+        urlretrieve(url, dest_zip)
+
+        with zipfile.ZipFile(dest_zip) as zf:
+            zf.extractall(unzip_dir)
+
+        yield unzip_dir
 
 
 @contextlib.contextmanager
@@ -35,119 +150,3 @@ def move_dir(src, to):
 def rmdir(path):
     if os.path.isdir(path):
         shutil.rmtree(path)
-
-
-class ManageGovUkAssets(Command):
-    """
-    Download and compile GOV.UK template, frontend toolkit and elements
-    """
-
-    option_list = (
-        Option('--app-dir', default='app', help="Relative path to app module"),
-        Option('--clean', action='store_true', help="Remove installed files"),
-    )
-
-    def __init__(self):
-        self.app_dir = None
-        self.clean = False
-        self.packages = {
-            'frontend_toolkit': GovUkFrontendToolkit,
-            'elements': GovUkElements,
-            'template': GovUkTemplate
-        }
-
-    def run(self, app_dir, clean):
-        """
-        Download and install the govuk assets
-        """
-
-        self.app_dir = app_dir
-        self.clean = clean
-
-        for package_name, package_class in self.packages.items():
-            self.install(package_name, package_class(app_dir))
-
-    def install(self, package_name, package):
-        """
-        Download and extract package zip file into tempdir, then build
-        """
-
-        if self.clean:
-            package.clean()
-
-        with TemporaryDirectory() as download_dir:
-            dest_zip = '{}/{}.zip'.format(download_dir, package_name)
-            unzip_dir = '{}/unzipped'.format(download_dir)
-
-            urllib.request.urlretrieve(package.url, dest_zip)
-
-            with zipfile.ZipFile(dest_zip) as zf:
-                zf.extractall(unzip_dir)
-
-            package.build(unzip_dir)
-
-
-class GovUkFrontendToolkit(object):
-
-    url = (
-        'https://github.com/alphagov/govuk_frontend_toolkit/archive/'
-        'master.zip')
-
-    def __init__(self, app_dir):
-        self.dest_dir = '{}/static/govuk_frontend_toolkit'.format(app_dir)
-
-    def clean(self):
-        rmdir(self.dest_dir)
-
-    def build(self, unzip_dir):
-        for path in ['images', 'javascripts', 'stylesheets']:
-            move_dir(
-                '{}/govuk_frontend_toolkit-master/{}'.format(unzip_dir, path),
-                to=self.dest_dir)
-
-
-class GovUkElements(object):
-
-    url = 'https://github.com/alphagov/govuk_elements/archive/master.zip'
-
-    def __init__(self, app_dir):
-        self.dest_dir = '{}/static/govuk_elements'.format(app_dir)
-
-    def clean(self):
-        rmdir(self.dest_dir)
-
-    def build(self, unzip_dir):
-        move_dir(
-            '{}/govuk_elements-master/public'.format(unzip_dir),
-            to=self.dest_dir)
-
-
-class GovUkTemplate(object):
-
-    url = 'https://github.com/alphagov/govuk_template/archive/master.zip'
-
-    def __init__(self, app_dir):
-        self.dest_views = '{}/templates/govuk_template'.format(app_dir)
-        self.dest_assets = '{}/static/govuk_template'.format(app_dir)
-
-    def clean(self):
-        rmdir(self.dest_views)
-        rmdir(self.dest_assets)
-
-    def build(self, unzip_dir):
-        master_dir = '{}/govuk_template-master'.format(unzip_dir)
-
-        with pushd(master_dir):
-
-            os.remove('.ruby-version')
-
-            subprocess.call(['bundle', 'install'])
-            subprocess.call(['bundle', 'exec', 'rake', 'build:jinja'])
-
-        move_dir(
-            '{}/pkg/jinja_govuk_template*/assets'.format(master_dir),
-            to=self.dest_assets)
-
-        move_dir(
-            '{}/pkg/jinja_govuk_template*/views'.format(master_dir),
-            to=self.dest_views)

@@ -8,15 +8,15 @@
   <h3 class="heading-small user-name">{{ current_user.name|default(current_user.email) }}</h3>
   <div class="user-auth-status-container">
     <span class="user-auth-status">
-      {% if auth_time -%}
-      You last signed in <span class="auth-time" data-last-auth-time="{{ auth_time }}">{{ auth_time|prettydate }}</span>
+      {% if session['id_token'] -%}
+      You last signed in <span class="auth-time" data-last-auth-time="{{ session['id_token']['iat'] }}">{{ session['id_token']['iat']|prettydate }}</span>
       {% endif %}
       (<a href="{{ url_for_security('logout') }}">Sign out</a>)
-      <div class="auth-msg auth-msg--warning">You'll need to <a href="{{ url_for('base.reauthenticate', caller='admin') }}">reauthenticate</a> soon</div>
-      <div class="auth-msg auth-msg--reauth">You'll have to <a href="{{ url_for('base.reauthenticate', caller='admin') }}">reauthenticate</a> before performing certain actions</div>
+      <div class="auth-msg auth-msg--warning">You'll need to <a href="{{ url_for('main.reauthenticate', caller='admin') }}">reauthenticate</a> soon</div>
+      <div class="auth-msg auth-msg--reauth">You'll have to <a href="{{ url_for('main.reauthenticate', caller='admin') }}">reauthenticate</a> before performing certain actions</div>
     </span>
   </div>
-  <span><a href="{{ url_for('base.details', action='edit') }}">Edit your details</a></span>
+  <span><a href="{{ url_for('main.details', action='edit') }}">Edit your details</a></span>
 
   {%- else -%}
 

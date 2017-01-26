@@ -14,6 +14,11 @@ if env.get('SETTINGS') == 'AWS':
 
 APP_NAME = env.get('APP_NAME', 'smb')
 
+PREFERRED_URL_SCHEME = 'https'
+
+SERVER_NAME = env.get(
+    'SERVER_NAME', 'localhost:{}'.format(env.get('PORT', 5000)))
+
 DB = {
     'user': env.get('DB_USERNAME'),
     'pass': env.get('DB_PASSWORD'),
@@ -42,25 +47,10 @@ GOVUK_PAY = {
     'api_key': env.get('GOVUK_PAY_API_KEY')
 }
 
-OIDC_PROVIDERS = {
-    'dex': {
-        'discovery_url': env.get('OIDC_ISSUER'),
-        'client_id': env.get('OIDC_CLIENT_ID'),
-        'client_secret': env.get('OIDC_CLIENT_SECRET'),
-        'redirect_uri': None
-    },
-    'azure_ad': {
-        'discovery_url': env.get('OIDC_ISSUER_1'),
-        'client_id': env.get('OIDC_CLIENT_ID_1'),
-        'client_secret': env.get('OIDC_CLIENT_SECRET_1'),
-        'redirect_uri': None
-    },
-    'google': {
-        'discovery_url': env.get('OIDC_ISSUER_2'),
-        'client_id': env.get('OIDC_CLIENT_ID_2'),
-        'client_secret': env.get('OIDC_CLIENT_SECRET_2'),
-        'redirect_uri': None
-    }
+OIDC_CLIENT = {
+    'issuer': env.get('OIDC_CLIENT_ISSUER'),
+    'client_id': env.get('OIDC_CLIENT_ID'),
+    'client_secret': env.get('OIDC_CLIENT_SECRET'),
 }
 
 # XXX This should be True when served over HTTPS
@@ -94,6 +84,42 @@ ASSETS_DEBUG = False
 ASSETS_LOAD_PATH = [
     'app/static',
     'app/templates']
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'default': {
+            'format': '%(name)s [%(levelname)s] %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+            'level': 'DEBUG'
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'formatter': 'default',
+            'level': 'DEBUG',
+            'filename': '/tmp/gateway.log',
+        }
+    },
+    'loggers': {
+        'app.factory': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
+        'waitress': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        }
+    },
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console', 'file'],
+    },
+}
 
 # Calculate friendly times using UTC instead of local timezone
 HUMANIZE_USE_UTC = True

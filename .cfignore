@@ -43,6 +43,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+pytest.ini
 
 # Translations
 *.mo
@@ -86,11 +87,25 @@ ENV/
 
 # Rope project settings
 .ropeproject
-app/static/govuk_elements/
-app/static/govuk_frontend_toolkit/
-app/static/govuk_template/
-app/templates/govuk_template/
-app/static/stylesheets/
-app/static/javascript/
 *.env
 *.db
+
+# Version control
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Jenkins
+Jenkinsfile
+
+# non-CF deployment
+deploy/
+deploy-to-paas
+install-govuk-assets
+
+# dev keys
+server.crt
+server.key

@@ -22,7 +22,7 @@
         <tbody>
         {% for user in users %}
           <tr>
-            <form method="post" action="{{ url_for('base.update_user', user=user.id) }}">
+            <form method="post" action="{{ url_for('main.update_user', user=user.id) }}">
               <td><input name="name" value="{% if user.name %}{{ user.name }}{% endif %}"></td>
               <td><input name="email" value="{% if user.email %}{{ user.email }}{% endif %}"></td>
               <td><input name="mobile" value="{% if user.mobile %}{{ user.mobile }}{% endif %}"></td>
@@ -54,7 +54,7 @@
                 <button class="secondary button">Update</button>
               </td>
             </form>
-            <form method="post" action="{{ url_for('base.delete_user', user=user.id) }}">
+            <form method="post" action="{{ url_for('main.delete_user', user=user.id) }}">
               <td><button class="secondary button">Delete</button></td>
             </form>
           </tr>
