@@ -49,10 +49,9 @@ node {
     stage("Deploy") {
         def appName = cfAppName("sue-my-brother")
 
-        config = registerOIDCClient(appName)
+        def config = registerOIDCClient(appName)
 
         withEnv(config) {
-
             retry(2) {
                 deployToPaaS(appName)
             }
@@ -113,6 +112,25 @@ def parseOIDCCreds(def json) {
 def registerOIDCClient(appName) {
     def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
     def json = "{\"redirect_uris\": [\"https://${appName}.cloudapps.digital/oidc_callback\"]}"
-    def response = httpRequest(contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: json, url: url)
+
+    def delay = 4
+    def response = null
+    timeout(time: 240, unit: 'SECONDS') {
+        waitUntil {
+            try {
+                response = httpRequest(
+                    contentType: 'APPLICATION_JSON',
+                    httpMode: 'POST',
+                    requestBody: json,
+                    url: url
+                )
+                return true
+            } catch (err) {
+                sleep(time: delay, unit: 'SECONDS')
+            }
+            return false
+        }
+    }
+
     parseOIDCCreds(response.content)
 }
