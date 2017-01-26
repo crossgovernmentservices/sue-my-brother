@@ -8,6 +8,7 @@ node {
     properties([
         parameters([
             string(name: 'OIDC_CLIENT_ISSUER', defaultValue: 'https://ags-gateway.cloudapps.digital'),
+            string(name: 'GATEWAY_BRANCH', defaultValue: ''),
         ])
     ])
 
@@ -46,23 +47,37 @@ node {
     }
 
     stage("Deploy") {
-        def appName = "sue-my-brother"
-
-        if (BRANCH_NAME != 'master') {
-            appName = "${appName}-${BRANCH_NAME.replace('_', '-')}"
-        }
+        def appName = cfAppName("sue-my-brother")
 
         config = registerOIDCClient(appName)
 
-        withEnv([
-            "OIDC_CLIENT_ID=${config['client_id']}",
-            "OIDC_CLIENT_SECRET=${config['client_secret']}"]) {
+        withEnv(config) {
 
             retry(2) {
                 deployToPaaS(appName)
             }
         }
     }
+}
+
+
+def cfAppName(appName) {
+
+    def branch = "${BRANCH_NAME.replace('_', '-')}"
+
+    if (BRANCH_NAME != 'master') {
+        appName = "${appName}-${branch}"
+    }
+
+    try {
+        if (GATEWAY_BRANCH) {
+            appName = "${appName}-g-${GATEWAY_BRANCH}"
+        }
+    } catch (err) {
+        // not a gateway dependent deploy, so do nothing
+    }
+
+    return appName
 }
 
 
@@ -86,18 +101,18 @@ def deployToPaaS(appName) {
 
 
 @NonCPS
-def parseJson(def json) {
+def parseOIDCCreds(def json) {
     def config = new groovy.json.JsonSlurper().parseText(json)
-    [client_id: config['client_id'], client_secret: config['client_secret']]
+    [
+        "OIDC_CLIENT_ID=${config['client_id']}",
+        "OIDC_CLIENT_SECRET=${config['client_secret']}",
+    ]
 }
 
 
 def registerOIDCClient(appName) {
     def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
     def json = "{\"redirect_uris\": [\"https://${appName}.cloudapps.digital/oidc_callback\"]}"
-    echo "POSTing ${json}"
     def response = httpRequest(contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: json, url: url)
-    config = parseJson(response.content)
-    echo "Received client ID: ${config['client_id']}"
-    return config
+    parseOIDCCreds(response.content)
 }
