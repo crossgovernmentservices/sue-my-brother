@@ -67,14 +67,13 @@ node {
 
 
 def deployToPaaS(appName) {
-    def paasUser = 'f8b4788a-0383-4c2a-ba4f-64415628debb'
 
     withEnv([
             "CF_APPNAME=${appName}",
             "SERVER_NAME=https://${appName}.cloudapps.digital"]) {
         withCredentials([
             usernamePassword(
-                credentialsId: paasUser,
+                credentialsId: 'paas-deploy',
                 usernameVariable: 'CF_USER',
                 passwordVariable: 'CF_PASSWORD')]) {
 
