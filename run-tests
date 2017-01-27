@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+
+import argparse
+
+
+BASE_TEST_RUNNER_ARGS = [
+    '--eradicate',
+    '--flake8',
+    '--spec',
+]
+
+
+def main():
+    args = get_args()
+
+    try:
+        return run_tests(args.test, watch=args.watch, coverage=args.coverage)
+
+    except KeyboardInterrupt:
+        pass
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--coverage', action='store_true', help="""
+        Generate coverage report""".strip())
+    parser.add_argument('-t', '--test', default='tests', help="""
+        The test module to run""".strip())
+    parser.add_argument('-w', '--watch', action='store_true', help="""
+        Watch files for changes and rerun tests automatically""".strip())
+
+    return parser.parse_args()
+
+
+def run_tests(suite, watch=False, coverage=False):
+    from lib.script_utils import virtualenv
+
+    with virtualenv():
+        args = build_args(suite, coverage)
+        test_runner = run_on_updates() if watch else run_once()
+        return test_runner(args)
+
+
+def build_args(suite, coverage=False):
+    args = BASE_TEST_RUNNER_ARGS
+    args.extend(specified_test_suite(suite))
+    args.extend(coverage_report(coverage))
+    return args
+
+
+def specified_test_suite(suite):
+    if not suite:
+        suite = 'tests'
+    return ['--pyargs', suite]
+
+
+def coverage_report(coverage):
+    if coverage:
+        return [
+            '--cov-report', 'term',
+            '--cov-report', 'xml',
+            '--cov=app',
+        ]
+    return []
+
+
+def run_on_updates():
+    import pytest_watch
+
+    def runner(args):
+        watch_args = [
+            '--ignore', 'venv',
+            '--'
+        ]
+        return pytest_watch.command.main(watch_args + args)
+
+    return runner
+
+
+def run_once():
+    import pytest
+    return pytest.main
+
+
+if __name__ == '__main__':
+    import sys
+
+    sys.exit(main())

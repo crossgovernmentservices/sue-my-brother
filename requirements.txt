@@ -12,7 +12,7 @@ flask_sqlalchemy
 flask_wtf
 python_jose
 libsass
-git+https://github.com/alphagov/notifications-python-client@1.0.0#egg=notifications-python-client
+notifications-python-client
 oic
 pytest
 pytest-cov

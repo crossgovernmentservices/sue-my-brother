@@ -6,7 +6,6 @@ from flask_assets import ManageAssets
 from flask_migrate import MigrateCommand
 from flask_script import Manager
 from flask_security.utils import encrypt_password
-import pytest
 
 from app.extensions import user_datastore
 from app.factory import create_app
@@ -15,39 +14,6 @@ from app.factory import create_app
 manager = Manager(create_app)
 manager.add_command('assets', ManageAssets())
 manager.add_command('db', MigrateCommand)
-
-
-suites = {
-    'all': ['--pyargs', 'tests', '--start-live-server'],
-    'coverage': ['--pyargs', 'tests.spec', '--cov=app', '--cov-report=html']
-}
-
-
-@manager.option(
-    'suite', default='all', nargs='?', choices=suites.keys(),
-    help='Specify test suite to run (default all)')
-@manager.option('--spec', action='store_true', help='Output in spec style')
-@manager.option(
-    '--watch',
-    action='store_true',
-    help='Run tests on file changes')
-def test(spec, watch, suite):
-    """Runs tests"""
-    args = []
-
-    if spec:
-        args.extend(['--spec'])
-
-    if not suite:
-        suite = 'all'
-
-    args.extend(suites[suite])
-
-    if watch:
-        import pytest_watch
-        return pytest_watch.command.main(['--'] + args)
-
-    return pytest.main(args)
 
 
 @manager.command

@@ -143,7 +143,7 @@ python manage.py add_users
 
 eval "$(python manage.py set_env)"
 
-python manage.py install_all_govuk_assets
+./install_govuk_assets
 
 ```
 

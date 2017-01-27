@@ -35,7 +35,7 @@ node {
 
     stage("Test") {
         try{
-            sh "venv/bin/python manage.py test"
+            sh "./run-tests"
 
         } catch(err) {
             if (currentBuild.result == 'UNSTABLE') {
