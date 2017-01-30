@@ -70,7 +70,9 @@ def cfAppName(appName) {
 
     try {
         if (GATEWAY_BRANCH) {
-            appName = "${appName}-g-${GATEWAY_BRANCH}"
+            if (GATEWAY_BRANCH != 'master') {
+                appName = "${appName}-g-${GATEWAY_BRANCH}"
+            }
         }
     } catch (err) {
         // not a gateway dependent deploy, so do nothing
