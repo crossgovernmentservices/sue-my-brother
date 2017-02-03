@@ -84,19 +84,22 @@ def reauthenticate(caller=None):
 
 
 @main.route('/login')
-@oidc_client.authenticate
 def login():
 
-    user = user_datastore.get_user(session.get('userinfo', {}).get(
-        'email', session['id_token'].get('sub')))
+    print(request.headers)
+
+    auth_data = {}
+    for key, val in request.headers.items():
+        if key.startswith('X-Auth-'):
+            auth_data[key[7:].lower()] = val
+
+    user = user_datastore.get_user(auth_data.get('email'))
 
     if not user:
-        user = create_user(session.get('userinfo'))
+        user = create_user(auth_data)
 
-    user_name = getattr(user, 'name')
-    if user_name is None:
-        user_name = session.get('userinfo', {}).get('name')
-        user.name = user_name
+    if user.name is None:
+        user.name = auth_data.get('username')
         db.session.commit()
 
     login_user(user)
@@ -112,12 +115,10 @@ def logout():
 
 
 def create_user(user_info):
-    email = user_info.get('email', user_info.get('upn'))
 
     user = add_role('USER', user_datastore.create_user(
-        email=email,
-        issuer_id=user_info["iss"],
-        subject_id=user_info["sub"]))
+        email=user_info['email'],
+        subject_id=user_info['subject']))
 
     user_datastore.commit()
 
