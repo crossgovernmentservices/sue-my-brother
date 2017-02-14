@@ -46,14 +46,27 @@ node {
         }
     }
 
-    stage("Deploy") {
-        def appName = cfAppName("sue-my-brother")
+    if (!BRANCH_NAME.startsWith('PR-')) {
 
-        def config = registerOIDCClient(appName)
+        stage("Deploy") {
+            def appName = cfAppName("sue-my-brother")
 
-        withEnv(config) {
-            retry(2) {
-                deployToPaaS(appName)
+            def config = registerOIDCClient(appName)
+
+            stash(
+                name: "app",
+                includes: ".cfignore,Procfile,app/**,deploy-to-paas,lib/**,*.yml,migrations/**,*.txt,*.py,*.pem"
+            )
+
+            node("master") {
+
+                unstash "app"
+
+                withEnv(config) {
+                    retry(2) {
+                        deployToPaaS(appName)
+                    }
+                }
             }
         }
     }
