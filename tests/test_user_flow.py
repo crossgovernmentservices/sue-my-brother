@@ -100,14 +100,3 @@ class WhenEnteringSuitDetails(object):
         errors = post_suit({}).soup.find_all(class_='error')
         assert errors[0].parent.parent.find('label').text == \
             'Your Brother\'s Full Name'
-
-
-class WhenNavigatingToAdminUsers(object):
-
-    def it_redirects_to_identity_broker(
-            self, client, test_admin_user, admin_logged_in):
-
-        response = client.get(url_for('main.admin_users'))
-
-        assert "example.com" in response.headers['Location']
-        assert response.status_code == 302
