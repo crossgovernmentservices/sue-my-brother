@@ -29,7 +29,6 @@ from .permissions import (
 )
 from app.extensions import db, notify, pay, user_datastore
 from app.main import main
-from app import oidc_client
 
 
 def get_current_user():
@@ -69,7 +68,6 @@ def authenticated_within(max_age):
     return time_elapsed_since_authenticated <= max_age
 
 
-@oidc_client.authenticate
 def force_authentication(path=None):
     return redirect(path or url_for('.index'))
 
@@ -333,8 +331,6 @@ def reject(suit):
 def admin_users():
     auth_state = session.pop("auth_state", None)
     callback_state = session.pop('callback_state', None)
-    if auth_state is None or auth_state != callback_state:
-        return reauthenticate(url_for('.admin_users'))
 
     users = User.query.all()
     return render_template(

@@ -122,8 +122,5 @@ def register_extensions(app):
     from app.extensions import notify
     notify.init_app(app)
 
-    from app.oidc_client import OIDCClient
-    OIDCClient(app)
-
     from app.extensions import pay
     pay.init_app(app)
