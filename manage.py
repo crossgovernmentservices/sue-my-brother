@@ -75,7 +75,7 @@ def set_cf_env():
 @manager.command
 def runserver_ssl():
     manager.app.run(
-        host='localhost',
+        host='0.0.0.0',
         port=5443,
         ssl_context=('server.crt', 'server.key'))
 

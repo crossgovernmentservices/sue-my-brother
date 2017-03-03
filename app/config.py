@@ -16,9 +16,6 @@ APP_NAME = env.get('APP_NAME', 'smb')
 
 PREFERRED_URL_SCHEME = 'https'
 
-SERVER_NAME = env.get(
-    'SERVER_NAME', 'localhost:{}'.format(env.get('PORT', 5000)))
-
 DB = {
     'user': env.get('DB_USERNAME'),
     'pass': env.get('DB_PASSWORD'),
