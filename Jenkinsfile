@@ -7,7 +7,6 @@ node {
 
     properties([
         parameters([
-            string(name: 'OIDC_CLIENT_ISSUER', defaultValue: 'https://ags-gateway.cloudapps.digital'),
             string(name: 'GATEWAY_BRANCH', defaultValue: ''),
         ])
     ])
@@ -51,8 +50,6 @@ node {
         stage("Deploy") {
             def appName = cfAppName("sue-my-brother")
 
-            def config = registerOIDCClient(appName)
-
             stash(
                 name: "app",
                 includes: ".cfignore,Procfile,app/**,deploy-to-paas,lib/**,*.yml,migrations/**,*.txt,*.py,*.pem"
@@ -62,11 +59,7 @@ node {
 
                 unstash "app"
 
-                withEnv(config) {
-                    retry(2) {
-                        deployToPaaS(appName)
-                    }
-                }
+                deployToPaaS(appName)
             }
         }
     }
@@ -111,40 +104,4 @@ def deployToPaaS(appName) {
             }
         }
     }
-}
-
-
-@NonCPS
-def parseOIDCCreds(def json) {
-    def config = new groovy.json.JsonSlurper().parseText(json)
-    [
-        "OIDC_CLIENT_ID=${config['client_id']}",
-        "OIDC_CLIENT_SECRET=${config['client_secret']}",
-    ]
-}
-
-
-def registerOIDCClient(appName) {
-    def url = "${OIDC_CLIENT_ISSUER}/oidc/registration"
-    def json = "{\"redirect_uris\": [\"https://${appName}.cloudapps.digital/oidc_callback\"]}"
-
-    def response = null
-    timeout(5) {
-        waitUntil {
-            try {
-                response = httpRequest(
-                    contentType: 'APPLICATION_JSON',
-                    httpMode: 'POST',
-                    requestBody: json,
-                    url: url
-                )
-                return true
-            } catch (err) {
-                sleep(time: 30, unit: 'SECONDS')
-            }
-            return false
-        }
-    }
-
-    parseOIDCCreds(response.content)
 }

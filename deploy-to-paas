@@ -12,9 +12,6 @@ cf target -o csd-sso -s sandbox
 
 cat << EOF >> manifest.yml
   env:
-      OIDC_CLIENT_ID: $OIDC_CLIENT_ID
-      OIDC_CLIENT_SECRET: $OIDC_CLIENT_SECRET
-      OIDC_CLIENT_ISSUER: $OIDC_CLIENT_ISSUER
       SERVER_NAME: ${CF_APPNAME}.cloudapps.digital
 EOF
 
